@@ -45,7 +45,7 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticTextTopSpeed->Wrap( -1 );
 	bSizer_Banner->Add( m_staticTextTopSpeed, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5 );
 	
-	wxString m_choicesTopSpeed[] = { _T("5"), _T("10"), _T("15"), _T("20"), _T("25") };
+	wxString m_choicesTopSpeed[] = {_T("10"), _T("15"), _T("20"), _T("25") };
 	int m_numberTopSpeedChoices = sizeof( m_choicesTopSpeed ) / sizeof( wxString );
 	m_TopSpeed = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_numberTopSpeedChoices, m_choicesTopSpeed, 0 );
 	m_TopSpeed->SetSelection( 0 );
@@ -60,7 +60,7 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	int m_number_wind_dirChoices = sizeof( m_choices_wind_dirs ) / sizeof( wxString );
 	m_RelorTrue_Wind = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_number_wind_dirChoices, m_choices_wind_dirs, 0 );
 	m_RelorTrue_Wind->SetSelection( 1 );
-	m_RelorTrue_Wind->SetToolTip( _("True needs SOG input. ") );	
+	m_RelorTrue_Wind->SetToolTip( _("True needs Boat.SOG input. ") );	
 	bSizer_Banner->Add( m_RelorTrue_Wind, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
 	m_staticText148 = new wxStaticText( this, wxID_ANY, _("Wind:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -77,11 +77,11 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_staticText146->Wrap( -1 );
 	bSizer_Banner->Add( m_staticText146, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5 );
 	
-	wxString m_choices_sourceSpeed[] = { _("SOG"), _("STW") };
+	wxString m_choices_sourceSpeed[] = { _("Boat.SOG"), _("Boat.STW") };
 	int m_sourceSpeedNChoices = sizeof( m_choices_sourceSpeed ) / sizeof( wxString );
 	m_sourceSpeed = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_sourceSpeedNChoices, m_choices_sourceSpeed, 0 );
 	m_sourceSpeed->SetSelection( 0 );
-	m_sourceSpeed->SetToolTip( _(" STW - Speed through water\nSOG - Speed over ground.") );	
+	m_sourceSpeed->SetToolTip( _(" Boat.STW - Speed through water\nBoat.SOG - Speed over ground.") );	
 	bSizer_Banner->Add( m_sourceSpeed, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
 	m_buttonFilterPolar = new wxButton( this, wxID_ANY, _("Filter"), wxDefaultPosition, wxDefaultSize, 0 );

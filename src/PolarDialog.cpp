@@ -74,8 +74,8 @@ void PolarDialog::OnNMEAtimer(wxTimerEvent& event)          // 1 second event (N
 
 	if(NMEA_timeout == 0)                             // Take snapshot of data every 5 secs
 	{
-		wxString Current_Data = wxString::Format(_T("SOG:%.2f   STW:%.2f   rel_wind_speed:%.2f   rel_wind_dir:%.2f"), polar->SOGspeed,
-            polar->STWspeed, polar->rel_wind_speed, polar->rel_wind_dir);
+		wxString Current_Data = wxString::Format(_T("Boat.SOG:%.2f   Boat.STW:%.2f   Wind.RWS:%.2f   Wind.RWA:%.2f"), polar->Boat.SOG,
+            polar->Boat.STW, polar->Wind.RWS, polar->Wind.RWA);
 			m_staticTextEngine->SetLabel(Current_Data);
 
         if (polar->validate_data(true)){
@@ -194,6 +194,7 @@ void PolarDialog::OnGridCellChange( wxGridEvent& event )
 		}
 		cell_str = wxString::Format(_T("%.2f"),wxAtof(cell_str));
         polar->load_POL_datum_str(cell_str,event.GetRow(),event.GetCol());
+
 	}
 	event.Skip();
 }

@@ -695,7 +695,7 @@ wxJSONWriter::WriteStringValue( wxOutputStream& os, const wxString& str )
 
     // store the column at which the string starts
     // splitting strings only happen if the string starts within
-    // column wxJSONWRITER_LAST_COL (default 50)
+    // column wxJSONWRITER_LASTpd (default 50)
     // see 'include/wx/json_defs.h' for the defines
     int tempCol = m_colNo;
 
@@ -1116,7 +1116,7 @@ wxJSONWriter::WriteInvalid( wxOutputStream& os )
 int
 wxJSONWriter::WriteMemoryBuff( wxOutputStream& os, const wxMemoryBuffer& buff )
 {
-#define MAX_BYTES_PER_ROW	20
+#define MAX_BYTES_PERir	20
     char str[16];
 
     // if STYLED and SPLIT_STRING flags are set, the function writes 20 bytes on every row
@@ -1185,7 +1185,7 @@ wxJSONWriter::WriteMemoryBuff( wxOutputStream& os, const wxMemoryBuffer& buff )
                 ++bytesWritten;
             }
 
-            if (( bytesWritten >= MAX_BYTES_PER_ROW ) && ((buffLen - i ) >= 5 ))   {
+            if (( bytesWritten >= MAX_BYTES_PERir ) && ((buffLen - i ) >= 5 ))   {
                 // split the string if we wrote 20 bytes, but only is we have to
                 // write at least 5 bytes
                 os.Write( "\'\n", 2 );

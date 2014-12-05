@@ -87,7 +87,7 @@ public:
       void SetPolarDialogY    (int x){ m_Polar_dialog_y = x;}
       void SetPolarDialogSizeX(int x){ m_Polar_dialog_sx = x;}
       void SetPolarDialogSizeY(int x){ m_Polar_dialog_sy = x;}
-      void SetColourScheme(PI_ColorScheme cs);
+      //void SetColourScheme(PIpdorScheme cs);
 
       bool GetUseMS(void){ return m_bPolarUseMS; }
 

@@ -50,7 +50,7 @@ public:
 		double wdirMax[WINDDIR];
 		double wdirAve[WINDDIR];
 		double wdirTotal[WINDDIR];
-	}Master_pol[10];
+	}Master_pol[10];               // i_wspd,j_wdir
 
     struct STE_point
     {
@@ -80,6 +80,23 @@ public:
             Waypoint;     
     } m_Point;
 
+    struct wind{
+        double TWA;
+        double RWA;
+        double TWS;
+        double RWS;
+        double CTWS;
+        double CTWA; // corrected for tide/currents
+        } Wind;
+
+    struct boat{
+        double SOG;
+        double COG;
+        double STW;
+        double HDG;
+    } Boat;
+
+
 	wxDC*			dc;
 	wxColour		windColour[10];
 	polar_pi*		plugin;
@@ -91,22 +108,15 @@ public:
     wxString        wind_display_selection;
 	double			wind_dir;
 	double			wind_speed;
+    int             j_wdir,i_wspd;
 	wxString		wind_ref;
 
-    double          rel_wind_dir;
-    double          true_wind_dir;
-    double          rel_wind_speed;
-    double          true_wind_speed;
-
-
-	double			SOGspeed;
-	double			STWspeed;
     double          boat_speed;
     int             set_drift_calc;
     double          current_set;
     double          current_drift;
-    double          COG;
-    double          HDG;
+    double          m_COG;
+    double          m_HDG;
 
 	bool			input_NMEA;
 	bool			engineRunning;
@@ -128,11 +138,12 @@ public:
 	void parse_NMEA(wxString sentence);
 
     bool validate_data(bool rel);
+    
+    bool filter_data();
 	void insert_data_to_grid();
     void insert_data_to_Masterpol();
 	void setEngineStatus(wxString str);
-    void convert_rel_tru(double rel_wind_speed, double rel_wind_direction, double boat_speed);
-    void convert_tru_rel(double true_wind_speed, double true_wind_direction, double boat_speed);
+
     void clear_speeds_directions();
 
 	void clear_Master_pol();
@@ -165,7 +176,12 @@ private:
 //	void calculateData();
 };
 
-
+static double deg2rad(double deg);
+static double rad2deg(double rad);
+double VTW(double VAW, double BAW, double SOG);
+double BTW(double VAW, double BAW, double SOG);
+double VAW(double VTW, double BTW, double SOG);
+double BAW(double VTW, double BTW,double SOG);
 
 #endif
 

@@ -326,6 +326,7 @@ void polar_pi::OnToolbarToolCallback(int id)
 			  m_pPolarDialog->m_SourceData->SetSelection(1); // to NMEA
 			  m_pPolarDialog->polar->set_Dlg_for_DataSource(1); // to NMEA
               m_pPolarDialog->polar->boat_LWL = m_boat_LWL;
+              m_pPolarDialog->polar->max_boat_speed = 1.43*sqrt(m_boat_LWL);       // hull speed
 		  }
 
           m_pPolarDialog->Hide();                        
@@ -444,10 +445,11 @@ bool polar_pi::SaveConfig(void)
       else
             return false;
 }
-
-void polar_pi::SetColourScheme(PI_ColorScheme cs)
+/*
+void polar_pi::SetColourScheme(PIpdorScheme cs)
 {
 
       DimeWindow(m_pPolarDialog);
 
 }
+*/

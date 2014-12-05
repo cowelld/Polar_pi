@@ -182,8 +182,8 @@
 //
 // the following macros are used by the wxJSONWriter::WriteStringValues()
 // when the wxJSONWRITER_SPLIT_STRING flag is set
-#define wxJSONWRITER_LAST_COL	50
-#define wxJSONWRITER_SPLIT_COL	75
+#define wxJSONWRITER_LASTpd	50
+#define wxJSONWRITER_SPLITpd	75
 #define wxJSONWRITER_MIN_LENGTH	15
 #define wxJSONWRITER_TAB_LENGTH  4
 

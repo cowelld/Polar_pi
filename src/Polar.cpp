@@ -90,19 +90,19 @@ Polar::~Polar(void)
 	delete filterDlg;
 }
 
-void Polar::load_POL_datum_str(wxString boat_speed, int i_wd_rows, int i_ws_cols)
+void Polar::load_POL_datum_str(wxString boat_speed, int i_wdirs, int i_wspds)
 {                                           // TODO Look to calculate averages
 	boat_speed.Replace(_T(","),_T("."));
 	double speed = wxAtof(boat_speed);
 	if(speed > 0.0)
 	{
-		Master_pol[i_ws_cols].wdirMax[i_wd_rows] = speed;
-		Master_pol[i_ws_cols].count[i_wd_rows] = 1;
+		Master_pol[i_wspds].wdirMax[i_wdirs] = speed;
+		Master_pol[i_wspds].count[i_wdirs] = 1;
 	}
 	else
 	{ // entry deleted????????????????????????????????????????????????????
-		Master_pol[i_ws_cols].wdirMax[i_wd_rows] = -1;
-		Master_pol[i_ws_cols].count[i_wd_rows] = 0;
+		Master_pol[i_wspds].wdirMax[i_wdirs] = -1;
+		Master_pol[i_wspds].count[i_wdirs] = 0;
 	}
 
 	dlg->m_panelPolar->Refresh();
@@ -216,7 +216,7 @@ void Polar::set_Dlg_for_DataSource(int data_source_index)        // Data Source
 }
 
 void Polar::load_Logbook()
-{
+{ /*
 //	::SendPluginMessage(wxString(_T("Save Polar Logbook.txt")),wxString(_T("")));
 
 	wxArrayString files;												
@@ -267,16 +267,16 @@ void Polar::load_Logbook()
 					if(m_str.Trim() != _T("S")) { nextline = true; break; }		// only at sea , no harbour,mooring etc., else read next line
 					break;
 
-				case 14: // SOG												// get SOG from GPS, if speed=0 get next line
+				case 14: // Boat.SOG												// get Boat.SOG from GPS, if speed=0 get next line
 					m_str.Replace(_T(","),_T("."));
-					SOGspeed = wxAtof(m_str);
-					if(SOGspeed == 0.0) { nextline = true; break; }	
+					Boat.SOG = wxAtof(m_str);
+					if(Boat.SOG == 0.0) { nextline = true; break; }	
 					break;
 
-				case 15: // STW												// get STW from Speedo, if speed=0 get next line
+				case 15: // Boat.STW												// get Boat.STW from Speedo, if speed=0 get next line
 					m_str.Replace(_T(","),_T("."));
-					STWspeed = wxAtof(m_str);
-					if(STWspeed == 0.0) { nextline = true; break; }
+					Boat.STW = wxAtof(m_str);
+					if(Boat.STW == 0.0) { nextline = true; break; }
 					break;
 
 				case 19: // WindDirection
@@ -344,7 +344,7 @@ void Polar::load_Logbook()
 					else
 						nextline = false;
 					break;
-*/
+
 				case 40: // Engine#2 Hours
 					if(!m_str.Trim().Contains(_T("00:00")))						// Don't use when Engine in on
 					{ boat_speed = 0; nextline = true; }
@@ -366,30 +366,30 @@ void Polar::load_Logbook()
 	}
 
 //****************************************************************************
-//************ Collect WIND Speeds within Speed  Range (Percent) for averaging
+//************ Collect BOAT Speeds within Speed  Range (Percent) for averaging
     if(filterDlg->BoatSpeedFilter->GetSelection())
 	{
-		for(int i_ws_cols = 0; i_ws_cols < 10; i_ws_cols++)
+		for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 		{
-			for(int i_wd_rows = 0; i_wd_rows  < WINDDIR; i_wd_rows++)
+			for(int i_wdirs = 0; i_wdirs  < WINDDIR; i_wdirs++)
 			{
-				for (it = Master_pol[i_ws_cols].winddir.begin(); it != Master_pol[i_ws_cols].winddir.end(); ++it)
+				for (it = Master_pol[i_wspds].winddir.begin(); it != Master_pol[i_wspds].winddir.end(); ++it)
 				{
 					int wind_dir = (*it).first;
 					double wind_spd = (*it).second;
 
-					if((wind_dir == i_wd_rows) )
+					if((wind_dir == i_wdirs) )
 					{
-						double percent = ((wind_spd - Master_pol[i_ws_cols].wdirMax[i_wd_rows])/
-                            Master_pol[i_ws_cols].wdirMax[i_wd_rows])*100;
+						double percent = ((wind_spd - Master_pol[i_wspds].wdirMax[i_wdirs])/
+                            Master_pol[i_wspds].wdirMax[i_wdirs])*100;
 						//	wxMessageBox(wxString::Format(_T("%.2f %.2f %.2f proz = %.2f"),spd,Master_pol[i].wdirMax[n],spd-Master_pol[i].wdirMax[n],percent));
 
 						if(percent >= -wxAtof(filterDlg->boat_speed_range_pct->GetString(filterDlg->boat_speed_range_pct->GetSelection())))
 						{
-							Master_pol[i_ws_cols].count[i_wd_rows]++;
-							Master_pol[i_ws_cols].wdirTotal[i_wd_rows] += wind_spd;
+							Master_pol[i_wspds].count[i_wdirs]++;
+							Master_pol[i_wspds].wdirTotal[i_wdirs] += wind_spd;
 							/*wxMessageBox(wxString::Format(_T("%.2f %.2f %.2f proz = %.2f\n%i %.2f"),spd,Master_pol[i].wdirMax[n],Master_pol[i].wdirMax[n]-spd,((Master_pol[i].wdirMax[n]-spd)/spd)*100,
-							Master_pol[i].count[n],Master_pol[i].wdirTotal[n]));*/
+							Master_pol[i].count[n],Master_pol[i].wdirTotal[n]));
 
 						}
 					}
@@ -403,21 +403,21 @@ void Polar::load_Logbook()
 
 	if(filterDlg->BoatSpeedFilter->GetSelection() > 0)
 	{
-		for(int i_ws_cols = 0; i_ws_cols < 10; i_ws_cols++)
+		for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 		{
-			for(int i_wd_rows = 0; i_wd_rows < WINDDIR; i_wd_rows++)
+			for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++)
 			{
-				for (it = Master_pol[i_ws_cols].winddir.begin(); it!=Master_pol[i_ws_cols].winddir.end(); ++it)
+				for (it = Master_pol[i_wspds].winddir.begin(); it!=Master_pol[i_wspds].winddir.end(); ++it)
 				{
 					int wind_dir = (*it).first;
 					double wind_spd = (*it).second;
 
-					if((wind_dir == i_wd_rows) )
+					if((wind_dir == i_wdirs) )
 					{
-						Master_pol[i_ws_cols].count[i_wd_rows]++;
-						Master_pol[i_ws_cols].wdirTotal[i_wd_rows] += wind_spd;
+						Master_pol[i_wspds].count[i_wdirs]++;
+						Master_pol[i_wspds].wdirTotal[i_wdirs] += wind_spd;
 						/*wxMessageBox(wxString::Format(_T("%.2f %.2f %.2f proz = %.2f\n%i %.2f"),spd,Master_pol[i].wdirMax[n],Master_pol[i].wdirMax[n]-spd,((Master_pol[i].wdirMax[n]-spd)/spd)*100,
-						Master_pol[i].count[n],Master_pol[i].wdirTotal[n]));*/
+						Master_pol[i].count[n],Master_pol[i].wdirTotal[n]));
 
 					}
 				}
@@ -425,14 +425,14 @@ void Polar::load_Logbook()
 		}
     }
 
-	    for(int i_ws_cols = 0; i_ws_cols < 10; i_ws_cols++)
+	    for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 	    {
-		    for(int i_wd_rows = 0; i_wd_rows < WINDDIR; i_wd_rows++)
+		    for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++)
 		    {
-			    if(Master_pol[i_ws_cols].count[i_wd_rows] > 0)
+			    if(Master_pol[i_wspds].count[i_wdirs] > 0)
 			    {
-				    Master_pol[i_ws_cols].wdirAve[i_wd_rows] = Master_pol[i_ws_cols].wdirTotal[i_wd_rows] /
-                        Master_pol[i_ws_cols].count[i_wd_rows];
+				    Master_pol[i_wspds].wdirAve[i_wdirs] = Master_pol[i_wspds].wdirTotal[i_wdirs] /
+                        Master_pol[i_wspds].count[i_wdirs];
 			    }
 		    }
 
@@ -443,6 +443,7 @@ void Polar::load_Logbook()
 
 	dlg->m_panelPolar->Refresh();
 	dlg->m_button_SavePOL->Enable();
+    */
 }
 
 void Polar::loadVDR()
@@ -478,9 +479,12 @@ void Polar::loadVDR()
 
         if (validate_data(true))             // assume this is relative wind
 		{
-            insert_data_to_Masterpol();
-            insert_data_to_grid();
-            clear_speeds_directions();
+            if (filter_data())
+            {
+                insert_data_to_Masterpol();
+		        insert_data_to_grid();
+                clear_speeds_directions();
+            }
         }
 		s = wxEmptyString;
 
@@ -521,11 +525,14 @@ void Polar::loadSTE()
         parse_STE_record(s);
         load_STE_point();                       // loads all speeds and directions
 
-        if(validate_data(true))                    // loads boat_speed from SOG or STW
+        if (validate_data(true))                    // loads boat_speed from Boat.SOG or Boat.STW
         {
-            insert_data_to_Masterpol();
-		    insert_data_to_grid();
-            clear_speeds_directions();
+            if (filter_data())
+            {
+                insert_data_to_Masterpol();
+		        insert_data_to_grid();
+                clear_speeds_directions();
+            }
         }
 		s = wxEmptyString;
 	//	::wxYield();
@@ -538,20 +545,25 @@ void Polar::loadSTE()
 bool Polar::validate_data(bool rel)     // relative wind measurement source
 {
     bool data_OK = true;
-    max_boat_speed = 1.43*sqrt(boat_LWL);       // hull speed
 
-    if(dlg->m_sourceSpeed->GetSelection() == 0)  {   // 0-SOG 1-STW
+    if(dlg->m_sourceSpeed->GetSelection() == 0)  {   // 0-Boat.SOG 1-Boat.STW
         switch (set_drift_calc)
         {
         case 0:                     // 0- no correction (default)
-            if (SOGspeed > 2){
-                boat_speed = SOGspeed;
+            if (Boat.SOG > 2){
+                boat_speed = Boat.SOG;
                 break;
             }
             else data_OK = false;
             break;
 
         case 1:                     // 1- correct with measured NMEA set drift
+            if(Boat.HDG >= 0 && Boat.STW > 2)
+            {
+                if(Boat.COG >= 0 && Boat.SOG > 2)
+                {
+                }
+            }
             break;
         case 2:                     // 2 = correct with given set drift
             if (!filterDlg->input_Set_value->IsEmpty() &&
@@ -563,28 +575,33 @@ bool Polar::validate_data(bool rel)     // relative wind measurement source
             break;
         }
     }
-    else if (STWspeed > 2){
-        boat_speed = STWspeed;
+    else if (Boat.STW > 2){
+        boat_speed = Boat.STW;
         }
         else data_OK = false;    
 
 //************ Boat_speed good look at wind speed ********************
     if ( data_OK && boat_speed < max_boat_speed)
     {
-        if( rel_wind_speed > 2.0 && rel_wind_dir > 0 )
-            convert_rel_tru(rel_wind_speed, rel_wind_dir, boat_speed);
+        if( Wind.RWS > 2.0 && Wind.RWA > 0 )
+        {
+            Wind.TWA = rad2deg(BTW(Wind.RWS, deg2rad(Wind.RWA), boat_speed));
+            Wind.TWS = VTW(Wind.RWS, deg2rad(Wind.RWA), boat_speed);
+        }
     
-        else if (true_wind_speed > 2.0 && true_wind_dir > 0)
-            convert_tru_rel(true_wind_speed, true_wind_dir, boat_speed);
-
+        else if (Wind.TWS > 2.0 && Wind.TWA > 0)
+        {
+            Wind.RWS = VAW(Wind.TWS,deg2rad( Wind.TWA), boat_speed);
+            Wind.RWA = rad2deg(BAW(Wind.TWS, deg2rad(Wind.TWA), boat_speed));
+        }
            
         if (dlg->m_RelorTrue_Wind->GetSelection() == 0) {       // True wind
-            wind_dir = true_wind_dir;
-            wind_speed = true_wind_speed;
+            wind_dir = Wind.TWA;
+            wind_speed = Wind.TWS;
         }
         else {
-            wind_dir = rel_wind_dir;
-            wind_speed = rel_wind_speed;
+            wind_dir = Wind.RWA;
+            wind_speed = Wind.RWS;
         }
 
         if(wind_speed > 2.0){
@@ -592,43 +609,70 @@ bool Polar::validate_data(bool rel)     // relative wind measurement source
 //                wind_dir = (int) wind_dir % 360;      TODO
             if (wind_dir > 180)
                 wind_dir = 360 - wind_dir;
-            // true_wind_dir and rel_wind_dir are mapped to 0-180 degrees
+            // Wind.TWA and Wind.RWA are mapped to 0-180 degrees
         }
         else data_OK = false;        // too low wind speed
     }
     else data_OK = false;           // boat speed out of range
 
+    if (data_OK)
+    {
+        if(wind_dir > 25)
+        {
+            j_wdir = wxRound((wind_dir-25)/5); // 25->180 --> 0->31
+            i_wspd = wxRound(wind_speed/5);
+        }
+    }
+    return data_OK;
+}
+
+bool Polar:: filter_data()
+{
+    bool data_OK = false;
+    if (filterDlg->BoatSpeedFilter->GetSelection() == 0)        // 0 = max value 1 = Average
+    {
+        double cell_value = wxAtof(dlg->m_gridEdit->GetCellValue(j_wdir,i_wspd));
+            if( boat_speed > cell_value)
+            {
+                data_OK = true;        // use boat_speed value
+            } 
+    } else
+    {
+        if (boat_speed > Master_pol[i_wspd].wdirMax[j_wdir])
+        {
+            Master_pol[i_wspd].wdirMax[j_wdir] = boat_speed; // TODO Check effect of not zeroing sum & count
+        }
+
+        double lower_limit = (1 - .05 *
+            (filterDlg->boat_speed_range_pct->GetSelection() + 1)) *
+            Master_pol[i_wspd].wdirMax[j_wdir];
+
+        if (boat_speed > lower_limit)
+        {
+                Master_pol[i_wspd].count[j_wdir] += 1;
+                Master_pol[i_wspd].wdirTotal[j_wdir] += boat_speed;
+                boat_speed = Master_pol[i_wspd].wdirTotal[j_wdir] /
+                    Master_pol[i_wspd].count[j_wdir];
+                Master_pol[i_wspd].wdirAve[j_wdir] = boat_speed;
+                data_OK = true;
+        }
+    }
     return data_OK;
 }
 
 void Polar::insert_data_to_grid()
 {
-	int i_wd_row = wxRound((wind_dir-25)/5); // 25->180 --> 0->31
-    if(i_wd_row < 0) i_wd_row = 0;
-	int i_ws_col = wxRound(wind_speed/5);
-
-	if((i_wd_row >= 0 && i_wd_row < 32) && (i_ws_col >= 0 && i_ws_col < 10))
+	if((j_wdir >= 0 && j_wdir < 32) && (i_wspd >= 0 && i_wspd < 10))
 	{
-		if (filterDlg->BoatSpeedFilter->GetSelection() == 0){        // 0 = max value 1 = Average
-            if( boat_speed > wxAtof(dlg->m_gridEdit->GetCellValue(i_wd_row,i_ws_col)))
-                dlg->m_gridEdit->SetCellValue(i_wd_row,i_ws_col,wxString::Format(_T("%.2f"),boat_speed));
-        }
+        dlg->m_gridEdit->SetCellValue(j_wdir,i_wspd,wxString::Format(_T("%.2f"),boat_speed));
     }
 }
 
 void Polar::insert_data_to_Masterpol()
 {
-    int i_wd_row = wxRound((wind_dir-25)/5); // 25->180 --> 0->31
-    if(i_wd_row < 0) i_wd_row = 0;
-	int i_ws_col = wxRound(wind_speed/5);
-
-    Master_pol[i_ws_col].winddir.insert(std::pair<int,double>(i_wd_row,wind_speed));
-	
-    if (filterDlg->BoatSpeedFilter->GetSelection() == 0){         // 0-max, 1-average
-		if(boat_speed > Master_pol[i_ws_col].wdirMax[i_wd_row]){
-				Master_pol[i_ws_col].wdirMax[i_wd_row] = boat_speed;
-        }
-    }
+    Master_pol[i_wspd].winddir.insert(std::pair<int,double>(j_wdir,wind_speed));
+    if (filterDlg->BoatSpeedFilter->GetSelection() == 0)
+	    Master_pol[i_wspd].wdirMax[j_wdir] = boat_speed;
 }
 
 void Polar::createDiagram(wxDC& dc)
@@ -663,7 +707,7 @@ void Polar::Render_Polar()
 */
 //********** Draw Rings and speeds***********************
 	int pos_xknt, pos_yknt,neg_yknt;
-	for(int i = display_speed-1; i >= 0; i--)
+	for(int i = display_speed - 1; i >= 0; i--)
 	{
 		pos_xknt = wxRound(cos((0-90)*(PI/180.0))*image_pixel_height[i]+center.x);
 		pos_yknt = wxRound(sin((0-90)*(PI/180.0))*image_pixel_height[i]+center.y);
@@ -684,35 +728,44 @@ void Polar::Render_Polar()
 	}
 //********** Draw Spokes *********************************
 	int angle = 20;
-	for(; angle <= 180; angle += display_inc_deg)
+	for(angle; angle <= 180; angle += display_inc_deg)
 	{
-		int xt = wxRound(cos((angle-90)*(PI/180.0))*(image_pixel_height[(int)display_speed-1]+20)+center.x);
-		int yt = wxRound(sin((angle-90)*(PI/180.0))*(image_pixel_height[(int)display_speed-1]+20)+center.y);
+		int xt = wxRound(cos((angle - 90) * PI/180)*(image_pixel_height[(int)display_speed-1]+20)+center.x);
+		int yt = wxRound(sin((angle - 90) * PI/180)*(image_pixel_height[(int)display_speed-1]+20)+center.y);
 
 		dc->DrawLine(wxPoint(center.x,center.y),wxPoint(xt,yt));
 		dc->DrawText(wxString::Format(_T("%i\xB0"),angle), wxPoint(xt,yt));
 	}
 
 //************ LWL Data ******************************************
-    dc->DrawText(wxString::Format(_T("LWL: %3.1f  Max Speed: %3.1f"),boat_LWL,max_boat_speed), wxPoint(200,40));
+    dc->DrawText(wxString::Format(_T("LWL: %3.1f  Max Speed: %3.1f"),boat_LWL,max_boat_speed), wxPoint(200,20));
+
+//************ Filter effect *************************************
+    wxString Filter = _("Maximum boat speeds");
+    if ( filterDlg->BoatSpeedFilter->GetSelection() > 0)
+    {
+        double pct = 5 * (filterDlg->boat_speed_range_pct->GetSelection() + 1);
+        Filter = _("Using ") + (wxString::Format(_T("%2.0f pct of Max (Ave)"),pct));
+    }
+    dc->DrawText(Filter, wxPoint(200,40));
 
 	createSpeedBullets();
 }
 
 void Polar::createSpeedBullets()
 {
-    int selected_i_ws_col =  dlg->m_displaywind_speed->GetSelection();       // initially 0
+    int selected_i_wspd =  dlg->m_displaywind_speed->GetSelection();       // initially 0
 	
 	int end_index;
 	int xt, yt, bullet_point_count;
 	wxPoint ptBullets[180];             // max of 180 degrees
 
-	if(selected_i_ws_col != 0) {
-        selected_i_ws_col -= 1;
-        end_index = selected_i_ws_col + 1;
+	if(selected_i_wspd != 0) {
+        selected_i_wspd -= 1;
+        end_index = selected_i_wspd + 1;
     }
 	else{
-        selected_i_ws_col = 0;                  // all speeds
+        selected_i_wspd = 0;                  // all speeds
         end_index = 10;
     }
 
@@ -720,21 +773,21 @@ void Polar::createSpeedBullets()
 	wxColour Colour,brush;
 	wxPen init_pen = dc->GetPen();			// get actual Pen for restoring later
 
-    for(int i_ws_cols = selected_i_ws_col; i_ws_cols < end_index; i_ws_cols++)									// go thru all winddirection-structures depending on choiocebox degrees
+    for(int i_wspds = selected_i_wspd; i_wspds < end_index; i_wspds++)									// go thru all winddirection-structures depending on choiocebox degrees
 	{
 		bullet_point_count = 0;
-		Colour = windColour[i_ws_cols];
-        brush = windColour[i_ws_cols];
+		Colour = windColour[i_wspds];
+        brush = windColour[i_wspds];
 
-		for(int i_wd_rows = 0; i_wd_rows < WINDDIR; i_wd_rows++)          // 0->31
+		for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++)          // 0->31
 		{
-            double cell_value = wxAtof(dlg->m_gridEdit->GetCellValue(i_wd_rows,i_ws_cols));
+            double cell_value = wxAtof(dlg->m_gridEdit->GetCellValue(i_wdirs,i_wspds));
 			if( cell_value > 0) 
                 {
 			        speed_in_pixels = cell_value * pixels_knot_ratio;
 
-			        xt = wxRound(cos(((i_wd_rows*5+25)- 90)*PI/180)*speed_in_pixels + center.x);		// calculate the point for the bullet
-			        yt = wxRound(sin(((i_wd_rows*5+25)- 90)*PI/180)*speed_in_pixels + center.y);
+			        xt = wxRound(cos(((i_wdirs*5+25)- 90)*PI/180)*speed_in_pixels + center.x);		// calculate the point for the bullet
+			        yt = wxRound(sin(((i_wdirs*5+25)- 90)*PI/180)*speed_in_pixels + center.y);
 
                     wxPoint pt(xt,yt);
 				    ptBullets[bullet_point_count++] = pt;      // Add to display array
@@ -810,25 +863,25 @@ void Polar::save_POL_file()
 	for(int i = 0; i < 10; i++)	
 		save_data[i] = Master_pol[i];                       // Copy data
 
-	for(int i_ws_cols = 0; i_ws_cols < 10; i_ws_cols++)
+	for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 	{
-		for(int i_wd_rows = 0; i_wd_rows < WINDDIR; i_wd_rows++)          // 0->31
+		for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++)          // 0->31
 		{
-			save_data[i_ws_cols].wdirTotal[i_wd_rows] += save_data[i_ws_cols].wdirTotal[WINDDIR-1-i_wd_rows];    // Sum of values
-			save_data[i_ws_cols].count[i_wd_rows]     += save_data[i_ws_cols].count    [WINDDIR-1-i_wd_rows];    // Count of values
-			save_data[i_ws_cols].wdirMax[i_wd_rows]   += save_data[i_ws_cols].wdirMax  [WINDDIR-1-i_wd_rows];    //TODO Check out dirMax
+			save_data[i_wspds].wdirTotal[i_wdirs] += save_data[i_wspds].wdirTotal[WINDDIR-1-i_wdirs];    // Sum of values
+			save_data[i_wspds].count[i_wdirs]     += save_data[i_wspds].count    [WINDDIR-1-i_wdirs];    // Count of values
+			save_data[i_wspds].wdirMax[i_wdirs]   += save_data[i_wspds].wdirMax  [WINDDIR-1-i_wdirs];    //TODO Check out dirMax
 
-			if(save_data[i_ws_cols].count[i_wd_rows] >= 2 && save_data[i_ws_cols].count[WINDDIR-1-i_wd_rows] > 0)    // NO!
-				save_data[i_ws_cols].wdirTotal[i_wd_rows] /= 2;
+			if(save_data[i_wspds].count[i_wdirs] >= 2 && save_data[i_wspds].count[WINDDIR-1-i_wdirs] > 0)    // NO!
+				save_data[i_wspds].wdirTotal[i_wdirs] /= 2;
 
-			if(save_data[i_ws_cols].wdirMax[i_wd_rows] > 0 && save_data[i_ws_cols].wdirMax[WINDDIR-1-i_wd_rows] > 0) // Averaging MAX doesn't make sense
-				save_data[i_ws_cols].wdirMax[i_wd_rows]	/= 2;
+			if(save_data[i_wspds].wdirMax[i_wdirs] > 0 && save_data[i_wspds].wdirMax[WINDDIR-1-i_wdirs] > 0) // Averaging MAX doesn't make sense
+				save_data[i_wspds].wdirMax[i_wdirs]	/= 2;
 
-			save_data[i_ws_cols].wdirTotal [WINDDIR-1-i_wd_rows] = 0;
-			save_data[i_ws_cols].count[WINDDIR-1-i_wd_rows] = 0;
+			save_data[i_wspds].wdirTotal [WINDDIR-1-i_wdirs] = 0;
+			save_data[i_wspds].count[WINDDIR-1-i_wdirs] = 0;
 
-			//if(save_data[i_ws_cols].count[i_wd_rows] > 0)
-			//save_data[i_ws_cols].count[i_wd_rows] = 1;
+			//if(save_data[i_wspds].count[i_wdirs] > 0)
+			//save_data[i_wspds].count[i_wdirs] = 1;
 		}
 	}
 
@@ -837,22 +890,22 @@ void Polar::save_POL_file()
 
 	if(sel == 0)                            // Standard OCPN POL file
 	{
-		for(int i_ws_cols = 0; i_ws_cols < 10; i_ws_cols++)
+		for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 		{
-			polarFile << (i_ws_cols+1)*5 << _T(" ");                   // wind_speed -> first posit of line
+			polarFile << (i_wspds+1)*5 << _T(" ");                   // wind_speed -> first posit of line
 
-			for(int i_wd_rows = 0; i_wd_rows < WINDDIR; i_wd_rows++) //  0->31
+			for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++) //  0->31
 			{
 				data = -1;
 				if (data_source_index == 0){                            // Logbook -> average
-					data = save_data[i_ws_cols].wdirAve[i_wd_rows];
+					data = save_data[i_wspds].wdirAve[i_wdirs];
                 }
                 else {
-                    data = save_data[i_ws_cols].wdirMax[i_wd_rows];          //NMEA,VDR, STE -> Max
+                    data = save_data[i_wspds].wdirMax[i_wdirs];          //NMEA,VDR, STE -> Max
 				}
 
-				polarFile << (i_wd_rows+5)*5 << _T(" ");              // 20->
-				if( data > 0.0)                                       // save_data[i_ws_cols].count[i_wd_rows] > 0 &&
+				polarFile << (i_wdirs+5)*5 << _T(" ");              // 20->
+				if( data > 0.0)                                       // save_data[i_wspds].count[i_wdirs] > 0 &&
 					polarFile << wxString::Format(_T("%.2f "),data);
 				else
 				polarFile << _T(" ");
@@ -868,34 +921,34 @@ void Polar::save_POL_file()
 			polarFile << wxString::Format(_T("%i\t"),i*5);
 		polarFile << _T("60\n");
 
-		for(int i_wd_rows = -1; i_wd_rows < WINDDIR; i_wd_rows++)
+		for(int i_wdirs = -1; i_wdirs < WINDDIR; i_wdirs++)
 		{
-			if(i_wd_rows == -1)
+			if(i_wdirs == -1)
 			{
 				for(int z = 0; z < 13; z++)
 					polarFile << _T("0\t");
 				polarFile << _T("\n");
 				continue;
 			}
-			polarFile << 20+(i_wd_rows*5) << _T("\t");
-			for(int i_ws_cols = 0; i_ws_cols < 10; i_ws_cols++)
+			polarFile << 20+(i_wdirs*5) << _T("\t");
+			for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 			{
 				data = -1;
 				switch(data_source_index)
 				{
 				case 0:
-					data = save_data[i_ws_cols].wdirTotal[i_wd_rows];
+					data = save_data[i_wspds].wdirTotal[i_wdirs];
 					break;
 				case 1:
 				case 2:
 				case 3:
                 case 4:
-					data = save_data[i_ws_cols].wdirMax[i_wd_rows];
+					data = save_data[i_wspds].wdirMax[i_wdirs];
 					break;
 				}
-				if(i_ws_cols == 0)
+				if(i_wspds == 0)
 					polarFile << _T("0\t");
-				if(save_data[i_ws_cols].count[i_wd_rows] > 0 && data >= 0.0)
+				if(save_data[i_wspds].count[i_wdirs] > 0 && data >= 0.0)
 					polarFile << wxString::Format(_T("%.2f\t"),data);
 				else
 					polarFile << _T("\t");
@@ -911,27 +964,27 @@ void Polar::save_POL_file()
 			polarFile << wxString::Format(_T("%i\t"),i*5);
 		polarFile << _T("\n");
 
-		for(int i_wd_rows = 0; i_wd_rows < WINDDIR; i_wd_rows++)
+		for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++)
 		{
-			polarFile << 25+(i_wd_rows*5) << _T("\t");
-			for(int i_ws_cols = 0; i_ws_cols < 10; i_ws_cols++)
+			polarFile << 25+(i_wdirs*5) << _T("\t");
+			for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 			{
 				data = -1;
 				switch(data_source_index)
 				{
 				case 0:
-					data = save_data[i_ws_cols].wdirTotal[i_wd_rows];
+					data = save_data[i_wspds].wdirTotal[i_wdirs];
 					break;
 				case 1:
 				case 2:
 				case 3:
                 case 4:
-					data = save_data[i_ws_cols].wdirMax[i_wd_rows];
+					data = save_data[i_wspds].wdirMax[i_wdirs];
 					break;
 				}
-				if(i_ws_cols == 0)
+				if(i_wspds == 0)
 					polarFile << _T("0\t");
-				if(save_data[i_ws_cols].count[i_wd_rows] > 0 && data >= 0.0)
+				if(save_data[i_wspds].count[i_wdirs] > 0 && data >= 0.0)
 					polarFile << wxString::Format(_T("%.2f\t"),data);
 				else
 					polarFile << _T("\t");
@@ -961,8 +1014,8 @@ void Polar::save_POL_file()
 	}
 	output.Close();
 
-	for(int i_ws_cols = 0; i_ws_cols < 10; i_ws_cols++)	
-		Master_pol[i_ws_cols] = save_data[i_ws_cols];     // TODO Load updated back to display?
+	for(int i_wspds = 0; i_wspds < 10; i_wspds++)	
+		Master_pol[i_wspds] = save_data[i_wspds];     // TODO Load updated back to display?
 	dlg->m_panelPolar->Refresh();
 }
 
@@ -1030,13 +1083,13 @@ void Polar::load_POL_file()
 			file_line = 0;                                          // starting at file line 0 (col 0)
 
         tkz.SetString(str);
-        int grid_row = 0;
+        int gridir = 0;
 
 //***************************************************************************************************		
 		if (file_type == 0)                                      // standard POL and csv
 		{
 			wxString s;
-            int grid_col = file_line;
+            int gridpd = file_line;
             double number;
             tkz.GetNextToken();                             // Wind Speed
 
@@ -1046,17 +1099,17 @@ void Polar::load_POL_file()
                 s.ToDouble(&number);
 
 				if(number < 20.){                            // Wind Angle
-                        dlg->m_gridEdit->SetCellValue(grid_row -1,grid_col,s);
+                        dlg->m_gridEdit->SetCellValue(gridir -1,gridpd,s);
 
                         tkz.GetNextToken();
                     }
-                grid_row++;
+                gridir++;
             }
 		}
 
         else if(file_type == 1 || file_type == 2)                              // special format
 		{
-			int i_ws_col = 0, token_count = 0; 
+			int i_wspd = 0, token_count = 0; 
 			wxString s;
 			while(tkz.HasMoreTokens())
 			{
@@ -1064,8 +1117,8 @@ void Polar::load_POL_file()
 				if(token_count > 11) break;
 				s = tkz.GetNextToken();
 				if(s == _T("0") && (file_type == 1 || file_type == 2)) continue;
-				dlg->m_gridEdit->SetCellValue(file_line,i_ws_col,s);
-				load_POL_datum_str(s,file_line,i_ws_col++);
+				dlg->m_gridEdit->SetCellValue(file_line,i_wspd,s);
+				load_POL_datum_str(s,file_line,i_wspd++);
 			}
 		}
         file_line++;
@@ -1087,13 +1140,13 @@ void Polar::parse_NMEA(wxString sentence)
 		{
 			if(m_NMEA0183.Parse())
 				if(m_NMEA0183.Rmc.SpeedOverGroundKnots != 999.0)
-					SOGspeed = m_NMEA0183.Rmc.SpeedOverGroundKnots;
+					Boat.SOG = m_NMEA0183.Rmc.SpeedOverGroundKnots;
 		}
 		else if(m_NMEA0183.LastSentenceIDReceived == _T("VHW"))
 		{
 			if(m_NMEA0183.Parse())
                 if(m_NMEA0183.Vhw.Knots != 999.0)
-				    STWspeed = m_NMEA0183.Vhw.Knots;
+				    Boat.STW = m_NMEA0183.Vhw.Knots;
 		}
 		else if(m_NMEA0183.LastSentenceIDReceived == _T("MWV"))
 		{
@@ -1110,12 +1163,12 @@ void Polar::parse_NMEA(wxString sentence)
 					wind_speed = m_NMEA0183.Mwv.WindSpeed/1.852;
 
                 if (wind_ref == _("R")) {
-                    rel_wind_speed = wind_speed;
-                    rel_wind_dir = wind_dir;
+                    Wind.RWS = wind_speed;
+                    Wind.RWA = wind_dir;
                 }
                 else if (wind_ref == _("T")){
-                    true_wind_speed = wind_speed;
-                    true_wind_dir = wind_dir;
+                    Wind.TWS = wind_speed;
+                    Wind.TWA = wind_dir;
                 }
 			}
 		}
@@ -1181,15 +1234,19 @@ void Polar::parse_NMEA(wxString sentence)
 void Polar::load_STE_point()
 {   
     clear_speeds_directions();
-    if(!m_Point.SOG.ToDouble(&SOGspeed)){};
-    if(!m_Point.BtWatSpd.ToDouble(&STWspeed)){};
-    if(!m_Point.RWSpd.ToDouble(&rel_wind_speed)){};
-    if(!m_Point.TWSpd.ToDouble(&true_wind_speed)){};
-    if(!m_Point.TrueWind.ToDouble(&true_wind_dir)){};
-    if(!m_Point.RelWind.ToDouble(&rel_wind_dir)){};        // these are radians
+    double temp = m_Point.SOG.ToDouble(&Boat.SOG);
+    temp = m_Point.COGT.ToDouble(&Boat.COG);
+    temp = m_Point.BtHDG.ToDouble(&Boat.HDG);
+    temp = m_Point.BtWatSpd.ToDouble(&Boat.STW);
+    temp = m_Point.RWSpd.ToDouble(&Wind.RWS);
+    temp = m_Point.TWSpd.ToDouble(&Wind.TWS);
+    temp = m_Point.TrueWind.ToDouble(&Wind.TWA);
+    temp = m_Point.RelWind.ToDouble(&Wind.RWA);
 
-    rel_wind_dir = rel_wind_dir * 180 /PI;
-    true_wind_dir = true_wind_dir * 180 /PI;
+    Boat.HDG = Boat.HDG * 180 /PI;   // these are radians  (but not geo referenced)
+    Boat.COG = Boat.COG * 180 /PI;
+    Wind.RWA = Wind.RWA * 180 /PI;
+    Wind.TWA = Wind.TWA * 180 /PI;
     wind_ref = _T("R");
 }
 
@@ -1240,39 +1297,21 @@ void Polar::setEngineStatus(wxString str)
 	}
 }
 
-void Polar::convert_rel_tru(double rel_wind_speed, double rel_wind_direction, double boat_speed)
-{
-	true_wind_dir = wxRound(atan(rel_wind_speed*sin(rel_wind_direction*PI/180)/
-        (rel_wind_speed*cos(wind_dir*PI/180)-boat_speed))*180/PI);
-
-    true_wind_speed = sqrt(pow((rel_wind_speed * sin(rel_wind_dir*PI/180)),2) +
-        pow((rel_wind_speed * cos(rel_wind_dir*PI/180)- boat_speed),2));
-}
-
-void Polar::convert_tru_rel(double true_wind_speed, double true_wind_direction, double boat_speed)
-{
-    rel_wind_dir = atan((true_wind_speed * sin(true_wind_dir*PI/180))/
-                        (true_wind_speed * cos(true_wind_dir*PI/180) + boat_speed)) * 180/PI;
-                    if (rel_wind_dir < 0) rel_wind_dir = rel_wind_dir + 180;
-                    if (true_wind_dir == 180 && boat_speed < true_wind_speed)  rel_wind_dir = 180;
-                    rel_wind_dir = wxRound(rel_wind_dir);
-
-    rel_wind_speed = sqrt(pow((true_wind_speed * sin(true_wind_dir*PI/180)),2) +
-                        pow((true_wind_speed * cos(true_wind_dir*PI/180) + boat_speed),2));
-}
-
 void Polar::clear_speeds_directions()
 {
-    STWspeed = 0;
-	SOGspeed = 0;
+    Boat.STW = 0;
+	Boat.SOG = 0;
+    Boat.HDG = -1;
+    Boat.COG = -1;
+
 	wind_speed = 0;
 	wind_dir = 0;
 	wind_ref = wxEmptyString;
 
-    true_wind_dir = 0;
-    true_wind_speed = 0;
-    rel_wind_dir = 0;
-    rel_wind_speed = 0;
+    Wind.TWA = 0;
+    Wind.TWS = 0;
+    Wind.RWA = 0;
+    Wind.RWS = 0;
 }
 
 void Polar::showDlg()
@@ -1325,11 +1364,11 @@ FilterDlg::FilterDlg( PolarDialog* parent, Polar* polar, wxWindowID id, const wx
 
 	bSizer_FilterRange->Add( bSizerMode, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxString m_choicesSetDrift[] = {_("Use straight SOG/STW"), _("Use Known Set and Drift"), _("Use NMEA measured Set and Drift")};
+    wxString m_choicesSetDrift[] = {_("Use straight Boat.SOG/Boat.STW"), _("Use Known Set and Drift"), _("Use NMEA measured Set and Drift")};
 	int m_numberSetDrift = sizeof( m_choicesSetDrift ) / sizeof( wxString );
 	SetDriftFilter = new wxChoice( boat_speed_range_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_numberSetDrift, m_choicesSetDrift, 0 );
 	SetDriftFilter->SetSelection(0);
-	SetDriftFilter->SetToolTip( _("If HDG and STW values available calculate STW = SOG - tidal current") );
+	SetDriftFilter->SetToolTip( _("If HDG and Boat.STW values available calculate Boat.STW = Boat.SOG - tidal current") );
 	bSizer_FilterRange->Add( SetDriftFilter, 0, wxALIGN_LEFT|wxALL, 5 );
 
     txtinput_Set_value = new wxStaticText( boat_speed_range_panel, wxID_ANY, _("Known Set value (degrees true):"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -1599,6 +1638,40 @@ void FilterDlg::OnButtonClickResetSails( wxCommandEvent& event )
     {
         checkboxSails[i]->SetValue( false );
     }
+}
+
+static double deg2rad(double deg)
+{
+    return ((90 - deg * PI / 180.0));
+}
+
+static double rad2deg(double rad)
+{
+    return (int(rad * 180.0 / PI + 90 + 360) % 360);
+}
+
+double VTW(double VAW, double BAW, double SOG)
+{
+    double VTW_value = sqrt(pow((VAW * sin(BAW)),2) + pow((VAW * cos(BAW)- SOG),2));
+    return VTW_value;
+}
+
+double BTW(double VAW, double BAW, double SOG)
+{
+    double BTW_value = atan((VAW * sin(BAW))/(VAW * cos(BAW)-SOG));
+    return BTW_value;
+}
+
+double VAW(double VTW, double BTW, double SOG)
+{
+    double VAW_value = sqrt(pow((VTW * sin(BTW)),2) + pow((VTW * cos(BTW)+ SOG), 2));
+    return VAW_value;
+}
+
+double BAW(double VTW, double BTW,double SOG)
+{
+    double BAW_value = atan((VTW * sin(BTW))/(VTW * cos(BTW)+ SOG));
+    return BAW_value;
 }
 /*
 ///////////////////////////// Collect Dialog ///////////////////////////////////
