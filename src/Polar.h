@@ -10,10 +10,11 @@
 
 #include "nmea0183.h"
 #include "Options.h"
+using namespace std;
 
 WX_DEFINE_ARRAY_DOUBLE(int, ArrayOfDouble);
 
-#define WINDDIR 32
+#define WINDDIR 32      // 16 five degree bins
 
 class PolarDialog;
 class polar_pi;
@@ -44,13 +45,13 @@ public:
 	struct pol
 	{
 		double	wdir[WINDDIR];
-		int		count[WINDDIR];
-		int		scount[WINDDIR];            // never used
-		std::multimap<int,double> winddir; // key:direction & value:speed
+		int		scount[WINDDIR];            // used to count key pairs??
+		std::multimap<int,double> winddir; // key:wind direction & value:wind speed
 		double wdirMax[WINDDIR];
 		double wdirAve[WINDDIR];
 		double wdirTotal[WINDDIR];
-	}Master_pol[10];               // i_wspd,j_wdir
+		int		count[WINDDIR];
+    }Master_pol[10];               // i_wspd,j_wdir
 
     struct STE_point
     {
@@ -98,7 +99,7 @@ public:
 
 
 	wxDC*			dc;
-	wxColour		windColour[10];
+	wxColour		windColour[12];
 	polar_pi*		plugin;
 
 	double			display_speed;
@@ -110,6 +111,10 @@ public:
 	double			wind_speed;
     int             j_wdir,i_wspd;
 	wxString		wind_ref;
+
+    int Wind_Dir_increment;
+    int Wind_Speed_increment;
+    int initial_Dir;
 
     double          boat_speed;
     int             set_drift_calc;
@@ -128,17 +133,19 @@ public:
 
 	std::multimap<int,double>::iterator it;
 
+
 	void Render_Polar();
 	void createDiagram(wxDC& dc);
 	void createSpeedBullets();
-
-	void showDlg();
+    void set_grid_indexes();
+               
 	void set_Dlg_for_DataSource(int sel);
 	void load_POL_datum_str(wxString s, int row, int col);
 	void parse_NMEA(wxString sentence);
 
     bool validate_data(bool rel);
-    
+
+    void showFilterDlg();    
     bool filter_data();
 	void insert_data_to_grid();
     void insert_data_to_Masterpol();
@@ -171,6 +178,7 @@ private:
 	int				radius;
 	double			image_pixel_height[24];                 // display height in pixels
 	double			pixels_knot_ratio;
+    wxString        filter_message;
 
 
 //	void calculateData();

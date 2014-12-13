@@ -148,7 +148,7 @@ void PolarDialog::OnChoiceWindPolar( wxCommandEvent& event )
 
 void PolarDialog::OnButtonClickFilterPolar( wxCommandEvent& event )
 {
-	polar->showDlg();
+	polar->showFilterDlg();
 }
 
 void PolarDialog::OnChoiceSourcePolar( wxCommandEvent& event )
@@ -192,10 +192,13 @@ void PolarDialog::OnGridCellChange( wxGridEvent& event )
 		{
 			cell_str.Replace(_T(","),_T("."));
 		}
-		cell_str = wxString::Format(_T("%.2f"),wxAtof(cell_str));
-        polar->load_POL_datum_str(cell_str,event.GetRow(),event.GetCol());
+		cell_str = wxString::Format(_T("%.2f"), wxAtof(cell_str));
+        polar->load_POL_datum_str(cell_str, event.GetRow(),event.GetCol());
 
 	}
+    else
+        polar->load_POL_datum_str(_("0.0"), event.GetRow(),event.GetCol());
+
 	event.Skip();
 }
 
@@ -208,10 +211,12 @@ void PolarDialog::OnSizesplitter1( wxSizeEvent& event )
 
 void PolarDialog::OnButtonClickLoad( wxCommandEvent& event )
 {
+    m_button_SavePOL->Disable();
 	polar->load_POL_file();
 }
 
 void PolarDialog::OnButtonClickSavePolar( wxCommandEvent& event )
 {
+
 	polar->save_POL_file();
 }

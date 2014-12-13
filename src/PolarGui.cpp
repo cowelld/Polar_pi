@@ -63,13 +63,13 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_RelorTrue_Wind->SetToolTip( _("True needs Boat.SOG input. ") );	
 	bSizer_Banner->Add( m_RelorTrue_Wind, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
-	m_staticText148 = new wxStaticText( this, wxID_ANY, _("Wind:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText148 = new wxStaticText( this, wxID_ANY, _("Display:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText148->Wrap( -1 );
 	bSizer_Banner->Add( m_staticText148, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5 );
 	
 	wxString m_choices_displaywind_speed[] = { _("All") };
-	int m_displaywind_speedNChoices = sizeof( m_choices_displaywind_speed ) / sizeof( wxString );
-	m_displaywind_speed = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_displaywind_speedNChoices, m_choices_displaywind_speed, 0 );
+//	int m_displaywind_speedNChoices = sizeof( m_choices_displaywind_speed ) / sizeof( wxString );
+	m_displaywind_speed = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,10, m_choices_displaywind_speed, 0 );
 	m_displaywind_speed->SetSelection( 0 );
 	bSizer_Banner->Add( m_displaywind_speed, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
@@ -108,7 +108,7 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer_Data_input = new wxBoxSizer( wxVERTICAL );
 	
 	m_gridEdit = new wxGrid( m_panel_Grid, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	
+
 	// Grid
 	m_gridEdit->CreateGrid( 32, 10 );
 	m_gridEdit->EnableEditing( true );
@@ -130,56 +130,16 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_gridEdit->EnableDragColMove( false );
 	m_gridEdit->EnableDragColSize( true );
 	m_gridEdit->SetColLabelSize( 30 );
-	m_gridEdit->SetColLabelValue( 0, _T("5") );
-	m_gridEdit->SetColLabelValue( 1, _T("10") );
-	m_gridEdit->SetColLabelValue( 2, _T("15") );
-	m_gridEdit->SetColLabelValue( 3, _T("20") );
-	m_gridEdit->SetColLabelValue( 4, _T("25") );
-	m_gridEdit->SetColLabelValue( 5, _T("30") );
-	m_gridEdit->SetColLabelValue( 6, _T("35") );
-	m_gridEdit->SetColLabelValue( 7, _T("40") );
-	m_gridEdit->SetColLabelValue( 8, _T("45") );
-	m_gridEdit->SetColLabelValue( 9, _T("50") );
+
 	m_gridEdit->SetColLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
 	// Rows
 	m_gridEdit->EnableDragRowSize( true );
 	m_gridEdit->SetRowLabelSize( 50 );
-	m_gridEdit->SetRowLabelValue( 0, _T("25\xB0") );
-	m_gridEdit->SetRowLabelValue( 1, _T("30\xB0") );
-	m_gridEdit->SetRowLabelValue( 2, _T("35\xB0") );
-	m_gridEdit->SetRowLabelValue( 3, _T("40\xB0") );
-	m_gridEdit->SetRowLabelValue( 4, _T("45\xB0") );
-	m_gridEdit->SetRowLabelValue( 5, _T("50\xB0") );
-	m_gridEdit->SetRowLabelValue( 6, _T("55\xB0") );
-	m_gridEdit->SetRowLabelValue( 7, _T("60\xB0") );
-	m_gridEdit->SetRowLabelValue( 8, _T("65\xB0") );
-	m_gridEdit->SetRowLabelValue( 9, _T("70\xB0") );
-	m_gridEdit->SetRowLabelValue( 10, _T("75\xB0") );
-	m_gridEdit->SetRowLabelValue( 11, _T("80\xB0") );
-	m_gridEdit->SetRowLabelValue( 12, _T("85\xB0") );
-	m_gridEdit->SetRowLabelValue( 13, _T("90\xB0") );
-	m_gridEdit->SetRowLabelValue( 14, _T("95\xB0") );
-	m_gridEdit->SetRowLabelValue( 15, _T("100\xB0") );
-	m_gridEdit->SetRowLabelValue( 16, _T("105\xB0") );
-	m_gridEdit->SetRowLabelValue( 17, _T("110\xB0") );
-	m_gridEdit->SetRowLabelValue( 18, _T("115\xB0") );
-	m_gridEdit->SetRowLabelValue( 19, _T("120\xB0") );
-	m_gridEdit->SetRowLabelValue( 20, _T("125\xB0") );
-    m_gridEdit->SetRowLabelValue( 21, _T("130\xB0") );
-	m_gridEdit->SetRowLabelValue( 22, _T("135\xB0") );
-    m_gridEdit->SetRowLabelValue( 23, _T("140\xB0") );
-	m_gridEdit->SetRowLabelValue( 24, _T("145\xB0") );
-    m_gridEdit->SetRowLabelValue( 25, _T("150\xB0") );
-	m_gridEdit->SetRowLabelValue( 26, _T("155\xB0") );
-    m_gridEdit->SetRowLabelValue( 27, _T("160\xB0") );
-	m_gridEdit->SetRowLabelValue( 28, _T("165\xB0") );
-    m_gridEdit->SetRowLabelValue( 29, _T("170\xB0") );
-	m_gridEdit->SetRowLabelValue( 30, _T("175\xB0") );
-    m_gridEdit->SetRowLabelValue( 31, _T("180\xB0") );
+	
     m_gridEdit->SetRowLabelAlignment( wxALIGN_CENTRE, wxALIGN_CENTRE );
 	
-	// Label Appearance
+	// Labels are set dynamically according to POL file data
 	
 	// Cell Defaults
 	m_gridEdit->SetDefaultCellAlignment( wxALIGN_RIGHT, wxALIGN_CENTRE );

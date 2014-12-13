@@ -86,6 +86,7 @@ int polar_pi::Init(void)
       m_Polar_dialog_sy = 900;
       m_pPolarDialog = NULL;
       m_bShowPolar = false;
+
 /*
 	  m_pLogbook_Sailing_Conditions = new Logbook_Sailing_Conditions;
 	  m_pLogbook_Sailing_Conditions->meter = _T("m");
