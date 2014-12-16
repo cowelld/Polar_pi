@@ -16,17 +16,17 @@ PolarDlg( parent )
 	this->Connect( NMEA_timer->GetId(),wxEVT_TIMER, wxTimerEventHandler( PolarDialog::OnNMEAtimer ),NULL,this);
 	NMEA_timeout = 5;
 
-	timerRPM = new wxTimer (this,501);
-	this->Connect( timerRPM->GetId(),wxEVT_TIMER, wxTimerEventHandler( PolarDialog::OnTimerRPM ),NULL,this);
+//	timerRPM = new wxTimer (this,501);
+//	this->Connect( timerRPM->GetId(),wxEVT_TIMER, wxTimerEventHandler( PolarDialog::OnTimerRPM ),NULL,this);
 }
 
 PolarDialog::~PolarDialog(void)
 {
 	NMEA_timer->Stop();
-    timerRPM->Stop();
+ //   timerRPM->Stop();
 	this->Disconnect( 500 ,wxEVT_TIMER, wxTimerEventHandler( PolarDialog::OnNMEAtimer ),NULL,this);
-	this->Disconnect( 501 ,wxEVT_TIMER, wxTimerEventHandler( PolarDialog::OnTimerRPM ),NULL,this);
-	delete timerRPM;
+//	this->Disconnect( 501 ,wxEVT_TIMER, wxTimerEventHandler( PolarDialog::OnTimerRPM ),NULL,this);
+//	delete timerRPM;
 	delete NMEA_timer;
 }
 
@@ -52,7 +52,7 @@ void PolarDialog::OnButtonClickClearData(wxCommandEvent& event)
 	polar->clear_Master_pol();
 	m_panelPolar->Refresh();
 }
-
+/*
 void PolarDialog::OnTimerRPM(wxTimerEvent& event)
 {
 	if(polar->data_source_index == 1 && polar->engineRunning)
@@ -65,7 +65,7 @@ void PolarDialog::OnTimerRPM(wxTimerEvent& event)
 		}
 	}
 }
-
+*/
 void PolarDialog::OnNMEAtimer(wxTimerEvent& event)          // 1 second event (NMEA only)
 {
 	event.Skip();
@@ -76,7 +76,7 @@ void PolarDialog::OnNMEAtimer(wxTimerEvent& event)          // 1 second event (N
 	{
 		wxString Current_Data = wxString::Format(_T("Boat.SOG:%.2f   Boat.STW:%.2f   Wind.RWS:%.2f   Wind.RWA:%.2f"), polar->Boat.SOG,
             polar->Boat.STW, polar->Wind.RWS, polar->Wind.RWA);
-			m_staticTextEngine->SetLabel(Current_Data);
+//			m_staticTextEngine->SetLabel(Current_Data);
 
         if (polar->validate_data(true)){
             polar->insert_data_to_grid();

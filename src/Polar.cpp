@@ -14,6 +14,7 @@
 #include <wx/stdpaths.h>
 #include <wx/progdlg.h>
 #include <wx/gdicmn.h>
+#include <wx/msgdlg.h>
 
 #include "nmea0183/nmea0183.h"
 #include "polar_pi.h"
@@ -31,7 +32,7 @@ Polar::Polar(PolarDialog* parent)
 	windColour[1] = wxTheColourDatabase->Find(_T("CORAL"));
 	windColour[2] = wxTheColourDatabase->Find(_T("CYAN"));
 	windColour[3] = wxTheColourDatabase->Find(_T("LIGHT BLUE"));
-	windColour[4] = wxTheColourDatabase->Find(_T("CORNFLOWER BLUE"));
+	windColour[4] = wxTheColourDatabase->Find(_T("SALMON"));
 	windColour[5] = wxTheColourDatabase->Find(_T("GREEN"));
 	windColour[6] = wxTheColourDatabase->Find(_T("BROWN"));
 	windColour[7] = wxTheColourDatabase->Find(_T("RED"));
@@ -40,13 +41,8 @@ Polar::Polar(PolarDialog* parent)
     windColour[10] = wxTheColourDatabase->Find(_T("WHITE"));
 
 	input_NMEA = false;
-	engineRunning = false;
-	dtRPM = wxDateTime::Now();
-
-    
-    Wind_Dir_increment = 5;     // default 5 deg and 5 knot intervals
-    Wind_Speed_increment = 5;
-    initial_Dir = 25;           //
+//	engineRunning = false;
+//	dtRPM = wxDateTime::Now();
 
     data_source_index = 1;       //NMEA input
 	clear_speeds_directions();   // clear input variables
@@ -57,15 +53,8 @@ Polar::Polar(PolarDialog* parent)
 
 	display_speed = wxAtoi(dlg->m_TopSpeed->GetString(0));
 	display_inc_deg = 10 ;
-    max_boat_speed = 30;       // hull speed
     set_drift_calc = 0;
-/*
-	for(int i = Wind_Speed_increment; i < 41; i += Wind_Speed_increment)      // wind speed choices for display
-		dlg->m_displaywind_speed->Append(wxString::Format(_T("%i knots"),i));
 
-	dlg->m_displaywind_speed->Append(_T("Max. only"));
-	dlg->m_displaywind_speed->SetSelection(0);
-*/
 	dlg->m_panelPolar->Layout();
 
 	wxStandardPathsBase& std_path = wxStandardPathsBase::Get();
@@ -94,33 +83,6 @@ Polar::~Polar(void)
 {
 	input_NMEA = false;
 	delete filterDlg;
-}
-
-void Polar::set_grid_indexes()
-{
-    for (int index = 0; index < 10; index++)
-    {
-        dlg->m_gridEdit->SetColLabelValue( index, wxString::Format(_T("%i"),Wind_Speed_increment * (index + 1)) );
-    }
-
-    for (int index2 = 0; index2 < 32; index2++)
-    {
-        int temp = Wind_Dir_increment * index2 + initial_Dir;
-        if (temp < 181){
-            dlg->m_gridEdit->SetRowLabelValue( index2, wxString::Format(_T("%i\xB0"), temp ));
-        } else
-            dlg->m_gridEdit->SetRowLabelValue( index2, _T(" "));
-    }
-
-    dlg->m_displaywind_speed->Clear();
-    dlg->m_displaywind_speed->Append(_("ALL"));
-    for(int i = Wind_Speed_increment; i < 41; i += Wind_Speed_increment)      // wind speed choices for display
-		dlg->m_displaywind_speed->Append(wxString::Format(_T("%i knots"),i));
-
-//	dlg->m_displaywind_speed->Append(_T("Max. only"));
-	dlg->m_displaywind_speed->SetSelection(0);
-
-    dlg->m_gridEdit->Refresh();
 }
 
 void Polar::load_POL_datum_str(wxString boat_speed, int i_wdirs, int i_wspds)
@@ -164,7 +126,7 @@ void Polar::set_Dlg_for_DataSource(int data_source_index)        // Data Source
 		if(dlg->NMEA_timer->IsRunning())
 			dlg->NMEA_timer->Stop();
 		input_NMEA = false;	
-
+        set_grid_indexes();
         load_Logbook();
 		break;
 
@@ -181,8 +143,9 @@ void Polar::set_Dlg_for_DataSource(int data_source_index)        // Data Source
         dlg->m_toggleBtnRecord->Show();
 
         dlg->NMEA_timer->Start(1000);
-		dlg->timerRPM->Start(5000);
-		
+//		dlg->timerRPM->Start(5000);
+		check_grid_increments();
+        set_grid_indexes();
         input_NMEA = true;
         break;
 
@@ -200,7 +163,8 @@ void Polar::set_Dlg_for_DataSource(int data_source_index)        // Data Source
 
         if(dlg->NMEA_timer->IsRunning())
 		dlg->NMEA_timer->Stop();
-
+        check_grid_increments();
+        set_grid_indexes();
 		loadVDR();
 		break;
 
@@ -219,6 +183,8 @@ void Polar::set_Dlg_for_DataSource(int data_source_index)        // Data Source
 			dlg->NMEA_timer->Stop();
 
 		input_NMEA = false;
+        check_grid_increments();
+        set_grid_indexes();
 		break;
 
     case 4:                                             // STE
@@ -238,6 +204,11 @@ void Polar::set_Dlg_for_DataSource(int data_source_index)        // Data Source
 			dlg->NMEA_timer->Stop();
 
         input_NMEA = false;
+        dlg->plugin->Wind_Speed_increment = 5;
+        dlg->plugin->Wind_Dir_increment = 5;
+        dlg->plugin->initial_Dir = 25;
+        set_grid_indexes();
+
 		loadSTE();
 		break;
 	}
@@ -524,11 +495,6 @@ void Polar::loadVDR()
 
 void Polar::loadSTE()
 {
-    Wind_Speed_increment = 5;
-    Wind_Dir_increment = 5;
-    initial_Dir = 25;
-    set_grid_indexes();
-
     wxString filetypext = _("*.trt");
     wxString m_infilename;
 	wxFileDialog fdlg(dlg,_("Select a STE File (.trt)"),_T(""), _T(""), filetypext, wxFD_OPEN|wxFD_FILE_MUST_EXIST );
@@ -576,6 +542,51 @@ void Polar::loadSTE()
 	dlg->m_button_SavePOL->Enable();
 }
 
+void Polar::check_grid_increments()
+{
+    if (dlg->plugin->Wind_Speed_increment != 5) {
+        wxString Inc_status = wxString::Format(_T("Grid increment values are: \nWind Direction %i \nWind speed %i \nInitial Dir %i \n\nUse 5,5,25 defaults?"),
+            dlg->plugin->Wind_Dir_increment,
+            dlg->plugin->Wind_Speed_increment,
+            dlg->plugin->initial_Dir);
+
+        int answer = wxMessageBox( Inc_status, _( ""),wxYES_NO);
+            if (answer == wxYES){
+                dlg->plugin->Wind_Dir_increment = 5;
+                dlg->plugin->Wind_Speed_increment = 5;
+                dlg->plugin->initial_Dir = 25;
+            }
+    }
+
+}
+
+void Polar::set_grid_indexes()
+{
+    for (int index = 0; index < 10; index++)
+    {
+        dlg->m_gridEdit->SetColLabelValue( index, wxString::Format(_T("%i"),dlg->plugin->Wind_Speed_increment * (index + 1)) );
+    }
+
+    for (int index2 = 0; index2 < 32; index2++)
+    {
+        int temp = dlg->plugin->Wind_Dir_increment * index2 + dlg->plugin->initial_Dir;
+        if (temp < 181){
+            dlg->m_gridEdit->SetRowLabelValue( index2, wxString::Format(_T("%i\xB0"), temp ));
+        } else
+            dlg->m_gridEdit->SetRowLabelValue( index2, _T(" "));
+    }
+
+    dlg->m_displaywind_speed->Clear();
+    dlg->m_displaywind_speed->Append(_("ALL"));
+    for(int i = dlg->plugin->Wind_Speed_increment; i < 41; i += dlg->plugin->Wind_Speed_increment)      // wind speed choices for display
+		dlg->m_displaywind_speed->Append(wxString::Format(_T("%i knots"),i));
+
+//	dlg->m_displaywind_speed->Append(_T("Max. only"));
+	dlg->m_displaywind_speed->SetSelection(0);
+
+    dlg->m_gridEdit->Refresh();
+}
+
 bool Polar::validate_data(bool rel)     // relative wind measurement source
 {
     bool data_OK = true;
@@ -615,7 +626,7 @@ bool Polar::validate_data(bool rel)     // relative wind measurement source
         else data_OK = false;    
 
 //************ Boat_speed good look at wind speed ********************
-    if ( data_OK && boat_speed < max_boat_speed)
+    if ( data_OK && boat_speed < dlg->plugin->m_hull_speed)
     {
         if( Wind.RWS > 2.0 && Wind.RWA > 0 )
         {
@@ -651,10 +662,19 @@ bool Polar::validate_data(bool rel)     // relative wind measurement source
 
     if (data_OK)
     {
-        if(wind_dir > 25)
+        if(wind_dir > dlg->plugin->initial_Dir)
         {
-            j_wdir = wxRound((wind_dir-25)/Wind_Dir_increment); // 25->180 --> 0->31
-            i_wspd = wxRound(wind_speed/Wind_Speed_increment);
+            j_wdir = wxRound((wind_dir-dlg->plugin->initial_Dir)/dlg->plugin->Wind_Dir_increment); // 25->180 --> 0->31
+            i_wspd = wxRound(wind_speed / dlg->plugin->Wind_Speed_increment);
+        }
+
+        if(dlg->plugin->m_bSpeed_limit)
+        {
+            if(boat_speed > max_boat_speed[i_wspd])
+                max_boat_speed[i_wspd] = boat_speed;
+            else
+                if(boat_speed < .70 * max_boat_speed[i_wspd])
+                    data_OK = false;
         }
     }
     return data_OK;
@@ -766,7 +786,7 @@ void Polar::Render_Polar()
 	}
 
 //************ LWL Data ******************************************
-    dc->DrawText(wxString::Format(_T("LWL: %3.1f  Max Speed: %3.1f"),boat_LWL,max_boat_speed), wxPoint(200,20));
+    dc->DrawText(wxString::Format(_T("LWL: %3.1f  Max Speed: %3.1f"),dlg->plugin->m_boat_LWL,dlg->plugin->m_hull_speed), wxPoint(200,20));
 
 //************ Filter effect *************************************
     filter_message = _("Maximum boat speed");
@@ -828,8 +848,8 @@ void Polar::createSpeedBullets()
                 {
 			        speed_in_pixels = cell_value * pixels_knot_ratio;
 
-			        xt = wxRound(cos(((i_wdirs*Wind_Dir_increment+25)- 90)*PI/180)*speed_in_pixels + center.x);		// calculate the point for the bullet
-			        yt = wxRound(sin(((i_wdirs*Wind_Dir_increment+25)- 90)*PI/180)*speed_in_pixels + center.y);
+			        xt = wxRound(cos(((i_wdirs*dlg->plugin->Wind_Dir_increment+25)- 90)*PI/180)*speed_in_pixels + center.x);		// calculate the point for the bullet
+			        yt = wxRound(sin(((i_wdirs*dlg->plugin->Wind_Dir_increment+25)- 90)*PI/180)*speed_in_pixels + center.y);
 
                     wxPoint pt(xt,yt);
 				    ptBullets[bullet_point_count++] = pt;      // Add to display list
@@ -953,7 +973,7 @@ void Polar::save_POL_file()
 	{
 		for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 		{
-			polarFile << (i_wspds+1)*Wind_Speed_increment << _T(" ");    // line header - wind speed
+			polarFile << (i_wspds+1) * dlg->plugin->Wind_Speed_increment << _T(" ");    // line header - wind speed
 
 			for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++) //  0->31
 			{
@@ -964,7 +984,7 @@ void Polar::save_POL_file()
                     data = save_data[i_wspds].wdirMax[i_wdirs];
 				}
 
-				polarFile << (i_wdirs)*Wind_Dir_increment + initial_Dir << _T(" ");  // Wind angle -
+				polarFile << (i_wdirs)*dlg->plugin->Wind_Dir_increment + dlg->plugin->initial_Dir << _T(" ");  // Wind angle -
 				if( data > 0.0)                                       
 					polarFile << wxString::Format(_T("%.2f "),data);
 				else
@@ -978,7 +998,7 @@ void Polar::save_POL_file()
 	{
 		polarFile << _T("TWA/TWS\t");
 		for(int i = 0 ; i < 11; i++)
-			polarFile << wxString::Format(_T("%i\t"),i*Wind_Speed_increment);
+			polarFile << wxString::Format(_T("%i\t"),i*dlg->plugin->Wind_Speed_increment);
 		    polarFile << _T("60\n");
     
 		for(int i_wdirs = -1; i_wdirs < WINDDIR; i_wdirs++)
@@ -990,7 +1010,7 @@ void Polar::save_POL_file()
 				polarFile << _T("\n");
 				continue;
 			}
-			polarFile << 25+(i_wdirs*Wind_Dir_increment) << _T("\t");
+			polarFile << 25+(i_wdirs*dlg->plugin->Wind_Dir_increment) << _T("\t");
 			for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 			{
                 data = -1;
@@ -1017,12 +1037,12 @@ void Polar::save_POL_file()
 	{
 		polarFile << _T("TWA\t");
 		for(int i = 0 ; i < 11; i++)
-			polarFile << wxString::Format(_T("%i\t"),i*Wind_Speed_increment);
+			polarFile << wxString::Format(_T("%i\t"),i*dlg->plugin->Wind_Speed_increment);
 		polarFile << _T("\n");
 
 		for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++)
 		{
-			polarFile << 25+(i_wdirs*Wind_Dir_increment) << _T("\t");
+			polarFile << 25+(i_wdirs*dlg->plugin->Wind_Dir_increment) << _T("\t");
 			for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 			{
 				data = -1;
@@ -1053,7 +1073,7 @@ void Polar::save_POL_file()
 	{
 	    for(int i_wspds = 0; i_wspds < 10; i_wspds++)
 		{
-			polarFile << (i_wspds+1)*Wind_Speed_increment << _T(",");                   // wind_speed -> first posit of line
+			polarFile << (i_wspds+1) * dlg->plugin->Wind_Speed_increment << _T(",");                   // wind_speed -> first posit of line
 
 			for(int i_wdirs = 0; i_wdirs < WINDDIR; i_wdirs++) //  0->31
 			{
@@ -1064,7 +1084,7 @@ void Polar::save_POL_file()
                     data = save_data[i_wspds].wdirMax[i_wdirs];
 				}
 
-				polarFile << (i_wdirs)*Wind_Dir_increment + initial_Dir<< _T(",");              // 20->
+				polarFile << (i_wdirs)*dlg->plugin->Wind_Dir_increment + dlg->plugin->initial_Dir<< _T(",");              // 20->
 				if( data > 0.0)                                       // save_data[i_wspds].count[i_wdirs] > 0 &&
 					polarFile << wxString::Format(_T("%.2f,"),data);
 				else
@@ -1122,9 +1142,9 @@ void Polar::load_POL_file()
 				tkz = tk;
                 tkz.SetString(str);
                 temp = tkz.GetNextToken();
-                initial_Dir = wxAtoi(temp);
+                dlg->plugin->initial_Dir = wxAtol(temp);
                 temp = str.GetChar(0);
-                Wind_Speed_increment = wxAtoi(temp);
+                dlg->plugin->Wind_Speed_increment = wxAtol(temp);
             }
             else if(str.Contains (_(" "))) {
                 file_type = 0;
@@ -1132,13 +1152,13 @@ void Polar::load_POL_file()
 				tkz = tk;
                 tkz.SetString(str);
                 temp = tkz.GetNextToken();
-                Wind_Speed_increment = wxAtoi(temp);
+                dlg->plugin->Wind_Speed_increment = wxAtol(temp);
                 temp = tkz.GetNextToken();
-                initial_Dir = wxAtoi(temp);
+                dlg->plugin->initial_Dir = wxAtol(temp);
                 temp = tkz.GetNextToken();
-                if (wxAtoi(temp) < initial_Dir)
+                if (wxAtol(temp) < dlg->plugin->initial_Dir)
                     temp = tkz.GetNextToken();
-                Wind_Dir_increment = wxAtoi(temp) - initial_Dir;
+                dlg->plugin->Wind_Dir_increment = wxAtoi(temp) - dlg->plugin->initial_Dir;
                 set_grid_indexes();
             }
             else 
@@ -1272,7 +1292,7 @@ void Polar::parse_NMEA(wxString sentence)
 	}
 
 //************** Engine data Parsing **********************************
-		wxStringTokenizer tkz(sentence,_T(","));
+/*		wxStringTokenizer tkz(sentence,_T(","));
 		wxString sentenceInd = tkz.GetNextToken();
 
 		if(sentenceInd == _T("$ERRPM"))
@@ -1309,7 +1329,7 @@ void Polar::parse_NMEA(wxString sentence)
 				}
 			}
 
-		}
+		} */
 }
 
 void Polar::load_STE_point()
@@ -1359,7 +1379,7 @@ void Polar::parse_STE_record(wxString m_instr)
         }
     }
 }
-
+/*
 void Polar::setEngineStatus(wxString str)
 {
 	if(data_source_index == 1 && str == _T("ON"))        // NMEA source with engine running
@@ -1377,7 +1397,7 @@ void Polar::setEngineStatus(wxString str)
 		input_NMEA = true;
 	}
 }
-
+*/
 void Polar::clear_speeds_directions()
 {
     Boat.STW = 0;

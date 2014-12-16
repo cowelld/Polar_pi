@@ -112,11 +112,8 @@ public:
     int             j_wdir,i_wspd;
 	wxString		wind_ref;
 
-    int Wind_Dir_increment;
-    int Wind_Speed_increment;
-    int initial_Dir;
-
     double          boat_speed;
+    double          max_boat_speed[10];
     int             set_drift_calc;
     double          current_set;
     double          current_drift;
@@ -124,11 +121,11 @@ public:
     double          m_HDG;
 
 	bool			input_NMEA;
-	bool			engineRunning;
-	wxDateTime		dtRPM;
+//	bool			engineRunning;
+//	wxDateTime		dtRPM;
 
-    double          max_boat_speed;
-    double          boat_LWL;
+//    double          hull_speed;
+//    double          boat_LWL;
 
 
 	std::multimap<int,double>::iterator it;
@@ -142,14 +139,14 @@ public:
 	void set_Dlg_for_DataSource(int sel);
 	void load_POL_datum_str(wxString s, int row, int col);
 	void parse_NMEA(wxString sentence);
-
+    void check_grid_increments();
     bool validate_data(bool rel);
 
     void showFilterDlg();    
     bool filter_data();
 	void insert_data_to_grid();
     void insert_data_to_Masterpol();
-	void setEngineStatus(wxString str);
+//	void setEngineStatus(wxString str);
 
     void clear_speeds_directions();
 

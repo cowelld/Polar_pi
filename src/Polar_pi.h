@@ -93,6 +93,17 @@ public:
 
       void OnPolarDialogClose();
 
+      bool              m_bPolarUseMS;
+      bool              m_bPlaning;
+      bool              m_bSpeed_limit;
+      wxString          m_boatLWL;
+      double            m_boat_LWL;
+      double            m_hull_speed;
+
+      long Wind_Dir_increment;
+      long Wind_Speed_increment;
+      long initial_Dir;
+
 private:
       bool LoadConfig(void);
       bool SaveConfig(void);
@@ -110,17 +121,20 @@ private:
       int              m_Polar_dialog_sx, m_Polar_dialog_sy;
       wxString         m_Polar_dir;
 
-      bool              m_bPolarUseMS;
-      bool              m_bPlaning;
-      wxString          m_boatLWL;
-      double            m_boat_LWL;
 
       //    Controls added to Preferences panel
 
       wxCheckBox        *m_pPolarUseMS;
       wxCheckBox        *m_pPlaning;
+      wxCheckBox        *m_pSpeed_limit;
       wxTextCtrl        *m_pBoat_LWL;
       wxStaticText      *pStatic_Boat_LWL;
+      wxStaticText      *pStatic_Wind_Inc;
+      wxTextCtrl        *m_tWind_Inc;
+
+      wxString          Wind_Speed_inc;
+      wxString          Wind_Dir_inc;
+      wxString          Init_dir;
 };
 
 #endif

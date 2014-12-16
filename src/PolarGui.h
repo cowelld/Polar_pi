@@ -95,7 +95,7 @@ class PolarDlg : public wxDialog
 		wxPanel* m_panelPolar;
 		wxPanel* m_panel_Grid;
 		wxGrid* m_gridEdit;
-		wxStaticText* m_staticTextEngine;
+//		wxStaticText* m_staticTextEngine;
         wxTextCtrl* m_staticTextRecord;
 //        wxTextCtrl* m_staticTextFieldData;
 		

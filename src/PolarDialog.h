@@ -34,7 +34,7 @@ class PolarDialog : public PolarDlg
         void OnChoiceSource( wxCommandEvent& event );
 		void OnGridCellChange( wxGridEvent& event );
 		void OnNMEAtimer(wxTimerEvent& event);
-		void OnTimerRPM(wxTimerEvent& event);
+//		void OnTimerRPM(wxTimerEvent& event);
 		void OnSizesplitter1( wxSizeEvent& event );
 		void OnToggleButtonRecord( wxCommandEvent& event );
 		void OnButtonClickClearData( wxCommandEvent& event );
@@ -45,7 +45,7 @@ class PolarDialog : public PolarDlg
 
 		wxTimer*	NMEA_timer;
 		int			NMEA_timeout;
-		wxTimer*	timerRPM;
+//		wxTimer*	timerRPM;
 
 	public:
 		/** Constructor */

@@ -97,10 +97,8 @@ int polar_pi::Init(void)
 */
       ::wxDisplaySize(&m_display_width, &m_display_height);
 
-      //    Get a pointer to the opencpn configuration object
       m_pconfig = GetOCPNConfigObject();
 
-      //    And load the configuration items
       LoadConfig();
 
       // Get a pointer to the opencpn display canvas, to use as a parent for the Polar dialog
@@ -219,10 +217,21 @@ void polar_pi::ShowPreferencesDialog( wxWindow* parent )
 	StaticBoxSizerPolar->Add( m_pBoat_LWL, 0, wxALL|wxALIGN_LEFT, 5 );
     m_pBoat_LWL->SetValue(m_boatLWL);
 
+    pStatic_Wind_Inc = new wxStaticText(dialog, wxID_ANY, _("Wind Speed Increment"));
+    StaticBoxSizerPolar->Add(pStatic_Wind_Inc, 1, wxALIGN_LEFT | wxALL, 2);
+
+    m_tWind_Inc = new wxTextCtrl( dialog, wxID_ANY);
+	StaticBoxSizerPolar->Add( m_tWind_Inc, 0, wxALL|wxALIGN_LEFT, 5 );
+    Wind_Speed_inc = wxString::Format(_("%i"), Wind_Speed_increment);
+    m_tWind_Inc->SetValue(Wind_Speed_inc);
+
     m_pPlaning = new wxCheckBox( dialog, -1, _("Planing boat."));
     StaticBoxSizerPolar->Add(m_pPlaning, 1, wxALIGN_LEFT|wxALL, border_size);
-
     m_pPlaning->SetValue(m_bPlaning);
+
+    m_pSpeed_limit = new wxCheckBox( dialog, -1, _("Use lower speed limit of 70 percent"));
+    StaticBoxSizerPolar->Add(m_pSpeed_limit, 1, wxALIGN_LEFT|wxALL, border_size);
+    m_pPlaning->SetValue(m_bSpeed_limit);
 
     m_pPolarUseMS = new wxCheckBox( dialog, -1, _("Show meters/sec for Wind Speed"));
     StaticBoxSizerPolar->Add(m_pPolarUseMS, 1, wxALIGN_LEFT|wxALL, border_size);
@@ -241,8 +250,19 @@ void polar_pi::ShowPreferencesDialog( wxWindow* parent )
                 m_boatLWL = m_pBoat_LWL->GetValue();
                 m_boatLWL.ToDouble(&m_boat_LWL);
             }
+
+            if(Wind_Speed_inc != m_tWind_Inc->GetValue()){
+                Wind_Speed_inc = m_tWind_Inc->GetValue();
+            }
+            Wind_Speed_inc.ToLong(&Wind_Speed_increment);
+            
+
             if (m_bPlaning != m_pPlaning->GetValue()){
                   m_bPlaning = m_pPlaning->GetValue();
+            }
+
+            if (m_bSpeed_limit != m_pSpeed_limit->GetValue()){
+                  m_bSpeed_limit = m_pSpeed_limit->GetValue();
             }
 
             if(m_bPolarUseMS != m_pPolarUseMS->GetValue()) // If change of WS units kill dialog and restart.
@@ -326,8 +346,7 @@ void polar_pi::OnToolbarToolCallback(int id)
 			  m_pPolarDialog->SetSize(m_Polar_dialog_sx, m_Polar_dialog_sy);
 			  m_pPolarDialog->m_SourceData->SetSelection(1); // to NMEA
 			  m_pPolarDialog->polar->set_Dlg_for_DataSource(1); // to NMEA
-              m_pPolarDialog->polar->boat_LWL = m_boat_LWL;
-              m_pPolarDialog->polar->max_boat_speed = 1.43*sqrt(m_boat_LWL);       // hull speed
+              m_hull_speed = 1.43*sqrt(m_boat_LWL);       // hull speed
 		  }
 
           m_pPolarDialog->Hide();                        
@@ -383,16 +402,19 @@ bool polar_pi::LoadConfig(void)
             pConf->Read ( _T( "PolarPlaningBoat" ), &m_bPlaning, 0 );
             pConf->Read ( _T( "PolarBoatLWL" ) ,&m_boatLWL, _T("0.0") );
             m_boatLWL.ToDouble(&m_boat_LWL);
+            pConf->Read ( _T( "PolarSpeedlimit" ), &m_bSpeed_limit, 0 );
+            pConf->Read ( _T( "PolarWindDirInc" ), &Wind_Dir_inc, _("5") );
+            Wind_Dir_increment = wxAtol(Wind_Dir_inc);
+            pConf->Read ( _T( "PolarWindSpdInc" ), &Wind_Speed_inc, _("5") );
+            Wind_Speed_increment = wxAtol(Wind_Speed_inc);
+            pConf->Read ( _T( "PolarInitWindDir" ), &Init_dir, _("25") );
+            initial_Dir= wxAtol(Init_dir);
 
             m_Polar_dialog_sx = pConf->Read ( _T ( "PolarDialogSizeX" ), 400L );
             m_Polar_dialog_sy = pConf->Read ( _T ( "PolarDialogSizeY" ), 800L );
             m_Polar_dialog_x =  pConf->Read ( _T ( "PolarDialogPosX" ), 20L );
             m_Polar_dialog_y =  pConf->Read ( _T ( "PolarDialogPosY" ), 100L );
 
-//            if((m_Polar_dialog_x < 0) || (m_Polar_dialog_x > m_display_width))
-//                  m_Polar_dialog_x = 5;
-//            if((m_Polar_dialog_y < 0) || (m_Polar_dialog_y > m_display_height))
-//                  m_Polar_dialog_y = 5;
 
             //pConf->SetPath ( _T ( "/PlugIns/Polar/Directories" ) );
  /*           pConf->Read ( _T ( "PolarDirectory" ), &m_Polar_dir );
@@ -428,11 +450,18 @@ bool polar_pi::SaveConfig(void)
 
       if(pConf)
       {
-            pConf->SetPath ( _T ( "/Plugins/Polar" ) );
+            pConf->SetPath ( _T("/Plugins/Polar" ) );
             pConf->Write ( _T ( "PolarUseMS" ), m_bPolarUseMS );
             pConf->Write ( _T( "PolarPlaningBoat" ), m_bPlaning);
             pConf->Write ( _T( "PolarBoatLWL" ) , m_boatLWL);
-
+            pConf->Write ( _T( "PolarSpeedlimit" ), m_bSpeed_limit );
+            Wind_Dir_inc = wxString::Format(_("%i"), Wind_Dir_increment);
+            pConf->Write ( _T("PolarWindDirInc" ), Wind_Dir_inc);
+            Wind_Speed_inc = wxString::Format(_("%i"),Wind_Speed_increment);
+            pConf->Write ( _T("PolarWindSpdInc" ), Wind_Speed_inc);
+            Init_dir = wxString::Format(_("%i"), initial_Dir);
+            pConf->Write ( _T( "PolarInitWindDir" ),Init_dir );
+            
             pConf->Write ( _T ( "PolarDialogSizeX" ),  m_Polar_dialog_sx );
             pConf->Write ( _T ( "PolarDialogSizeY" ),  m_Polar_dialog_sy );
             pConf->Write ( _T ( "PolarDialogPosX" ),   m_Polar_dialog_x );

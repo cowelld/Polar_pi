@@ -144,11 +144,11 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	// Cell Defaults
 	m_gridEdit->SetDefaultCellAlignment( wxALIGN_RIGHT, wxALIGN_CENTRE );
 	bSizer_Data_input->Add( m_gridEdit, 0, wxALL|wxEXPAND, 0 );
-	
+/*	
 	m_staticTextEngine = new wxStaticText( m_panel_Grid, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticTextEngine->Wrap( -1 );
 	bSizer_Data_input->Add( m_staticTextEngine, 0, wxALL|wxALIGN_LEFT, 5 );
-
+*/
 	
     m_staticTextRecord = new wxTextCtrl( m_panel_Grid, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(300,50), wxTE_MULTILINE);
 	bSizer_Data_input->Add( m_staticTextRecord, 0, wxALL|wxALIGN_LEFT, 5 );
