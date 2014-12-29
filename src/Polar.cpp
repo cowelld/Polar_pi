@@ -509,11 +509,12 @@ void Polar::loadSTE()
 		100, dlg,  wxFRAME_NO_TASKBAR | wxPD_AUTO_HIDE | wxPD_CAN_ABORT );
 	progressRead.Fit(); 
 
-
 	wxString s = wxEmptyString;
     long long ii = input.GetLength();
+            
+    newform = false;
 
-	do{
+	do {
 		in >> s;
 		if(input.Eof()) break;
 
@@ -630,14 +631,14 @@ bool Polar::validate_data(bool rel)     // relative wind measurement source
     {
         if( Wind.RWS > 2.0 && Wind.RWA > 0 )
         {
-            Wind.TWA = rad2deg(BTW(Wind.RWS, deg2rad(Wind.RWA), boat_speed));
-            Wind.TWS = VTW(Wind.RWS, deg2rad(Wind.RWA), boat_speed);
+            Wind.TWA = TWA(Wind.RWS, Wind.RWA, boat_speed);
+            Wind.TWS = TWS(Wind.RWS, Wind.RWA, boat_speed);
         }
     
         else if (Wind.TWS > 2.0 && Wind.TWA > 0)
         {
-            Wind.RWS = VAW(Wind.TWS,deg2rad( Wind.TWA), boat_speed);
-            Wind.RWA = rad2deg(BAW(Wind.TWS, deg2rad(Wind.TWA), boat_speed));
+            Wind.RWS = RWS(Wind.TWS, Wind.TWA, boat_speed);
+            Wind.RWA = RWA(Wind.TWS, Wind.TWA, boat_speed);
         }
            
         if (dlg->m_RelorTrue_Wind->GetSelection() == 0) {       // True wind
@@ -1099,7 +1100,8 @@ void Polar::save_POL_file()
 
 void Polar::load_POL_file()
 {
-	wxFileDialog fdlg(dlg,_("Select a Polar-File"),_T(""));
+	wxString filetypext = _("*.pol");
+    wxFileDialog fdlg(dlg,_("Select a Polar-File (.pol)"),_T(""), _T(""), filetypext, wxFD_OPEN|wxFD_FILE_MUST_EXIST );
 	if(fdlg.ShowModal() == wxID_CANCEL) return;
 
 	clear_Master_pol();
@@ -1199,8 +1201,7 @@ void Polar::load_POL_file()
 
 				if(number < 20.){                            // Wind Angle
                         dlg->m_gridEdit->SetCellValue(gridir -1,gridpd,s);
-
-                        tkz.GetNextToken();
+                        tkz.GetNextToken();                     
                     }
                 gridir++;
             }
@@ -1344,10 +1345,12 @@ void Polar::load_STE_point()
     temp = m_Point.TrueWind.ToDouble(&Wind.TWA);
     temp = m_Point.RelWind.ToDouble(&Wind.RWA);
 
-    Boat.HDG = Boat.HDG * 180 /PI;   // these are radians  (but not geo referenced)
-    Boat.COG = Boat.COG * 180 /PI;
-    Wind.RWA = Wind.RWA * 180 /PI;
-    Wind.TWA = Wind.TWA * 180 /PI;
+    if (newform == false) {                // Convert if old form
+        Boat.HDG = Boat.HDG * 180 /PI;   // from radians  (but not geo referenced)
+        Boat.COG = Boat.COG * 180 /PI;
+        Wind.RWA = Wind.RWA * 180 /PI;
+        Wind.TWA = Wind.TWA * 180 /PI;
+    }
     wind_ref = _T("R");
 }
 
@@ -1361,6 +1364,11 @@ void Polar::parse_STE_record(wxString m_instr)
         if( tokenizer.GetPosition() == 0 )
         {
             m_Point.UTS = tokenizer.GetNextToken();
+            if(m_Point.UTS.Contains(_T("NF")))
+                newform = true;
+            else
+                newform = false;
+
             m_Point.Lat = tokenizer.GetNextToken();
             m_Point.Lon = tokenizer.GetNextToken();
             m_Point.SOG = tokenizer.GetNextToken();
@@ -1745,36 +1753,50 @@ void FilterDlg::OnButtonClickResetSails( wxCommandEvent& event )
 
 static double deg2rad(double deg)
 {
-    return ((90 - deg * PI / 180.0));
+    return ((90 - deg) * PI / 180.0);
 }
 
 static double rad2deg(double rad)
 {
-    return (int(rad * 180.0 / PI + 90 + 360) % 360);
+    return (int(90 - (rad * 180.0 / PI) + 360) % 360);
 }
 
-double VTW(double VAW, double BAW, double SOG)
+double TWS(double RWS, double RWA, double SOG)
 {
-    double VTW_value = sqrt(pow((VAW * sin(BAW)),2) + pow((VAW * cos(BAW)- SOG),2));
-    return VTW_value;
+    RWA = deg2rad(RWA);
+    double TWS_value = sqrt(pow((RWS * sin(RWA)),2) + pow((RWS * cos(RWA)- SOG),2));
+    return TWS_value;
 }
 
-double BTW(double VAW, double BAW, double SOG)
+double TWA(double RWS, double RWA, double SOG)
 {
-    double BTW_value = atan((VAW * sin(BAW))/(VAW * cos(BAW)-SOG));
-    return BTW_value;
+    RWA = deg2rad(RWA);
+    double TWA_value = atan((RWS * sin(RWA))/(RWS * cos(RWA)-SOG));
+    TWA_value = rad2deg(TWA_value);
+    if(RWA > 180)
+        TWA_value = TWA_value + 180;
+    if (TWA_value < 0)
+        TWA_value = TWA_value + 180;
+    return TWA_value;
 }
 
-double VAW(double VTW, double BTW, double SOG)
+double RWS(double TWS, double TWA, double SOG)
 {
-    double VAW_value = sqrt(pow((VTW * sin(BTW)),2) + pow((VTW * cos(BTW)+ SOG), 2));
-    return VAW_value;
+    TWA = deg2rad(TWA);
+    double RWS_value = sqrt(pow((TWS * sin(TWA)),2) + pow((TWS * cos(TWA)+ SOG), 2));
+    return RWS_value;
 }
 
-double BAW(double VTW, double BTW,double SOG)
+double RWA(double TWS, double TWA,double SOG)
 {
-    double BAW_value = atan((VTW * sin(BTW))/(VTW * cos(BTW)+ SOG));
-    return BAW_value;
+    TWA = deg2rad(TWA);
+    double RWA_value = atan((TWS * sin(TWA))/(TWS * cos(TWA)+ SOG));
+    RWA_value = rad2deg(RWA_value);
+    if(TWA > 180)
+        RWA_value = RWA_value + 180;
+    if (RWA_value < 0)
+        RWA_value = RWA_value + 180;
+    return RWA_value;
 }
 /*
 ///////////////////////////// Collect Dialog ///////////////////////////////////

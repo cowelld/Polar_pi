@@ -97,7 +97,7 @@ public:
         double HDG;
     } Boat;
 
-
+    bool            newform;
 	wxDC*			dc;
 	wxColour		windColour[12];
 	polar_pi*		plugin;
@@ -159,7 +159,7 @@ public:
     void loadSTE();
     void load_STE_point();
     void parse_STE_record(wxString m_instr);
-
+    void parse_NSTE_record(wxString m_instr);
 
 
 
@@ -183,10 +183,10 @@ private:
 
 static double deg2rad(double deg);
 static double rad2deg(double rad);
-double VTW(double VAW, double BAW, double SOG);
-double BTW(double VAW, double BAW, double SOG);
-double VAW(double VTW, double BTW, double SOG);
-double BAW(double VTW, double BTW,double SOG);
+double TWS(double RWS, double RWA, double SOG);
+double TWA(double RWS, double RWA, double SOG);
+double RWS(double TWS, double TWA, double SOG);
+double RWA(double TWS, double TWA,double SOG);
 
 #endif
 
