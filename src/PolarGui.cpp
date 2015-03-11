@@ -110,7 +110,7 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_gridEdit = new wxGrid( m_panel_Grid, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 
 	// Grid
-	m_gridEdit->CreateGrid( 32, 10 );
+	m_gridEdit->CreateGrid( 32, 15 );
 	m_gridEdit->EnableEditing( true );
 	m_gridEdit->EnableGridLines( true );
 	m_gridEdit->EnableDragGridSize( false );
@@ -127,6 +127,11 @@ PolarDlg::PolarDlg( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_gridEdit->SetColSize( 7, 40 );
 	m_gridEdit->SetColSize( 8, 40 );
 	m_gridEdit->SetColSize( 9, 40 );
+    m_gridEdit->SetColSize( 10, 40 );
+	m_gridEdit->SetColSize( 11, 40 );
+	m_gridEdit->SetColSize( 12, 40 );
+	m_gridEdit->SetColSize( 13, 40 );
+	m_gridEdit->SetColSize( 14, 40 );
 	m_gridEdit->EnableDragColMove( false );
 	m_gridEdit->EnableDragColSize( true );
 	m_gridEdit->SetColLabelSize( 30 );

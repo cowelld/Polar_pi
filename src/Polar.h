@@ -14,7 +14,7 @@ using namespace std;
 
 WX_DEFINE_ARRAY_DOUBLE(int, ArrayOfDouble);
 
-#define WINDDIR 32      // 16 five degree bins
+#define WINDDIR 32      // 160 deg or 32 five degree bins
 
 class PolarDialog;
 class polar_pi;
@@ -51,7 +51,10 @@ public:
 		double wdirAve[WINDDIR];
 		double wdirTotal[WINDDIR];
 		int		count[WINDDIR];
-    }Master_pol[10];               // i_wspd,j_wdir
+    }Master_pol[15];               // i_wspd,j_wdir
+
+    int Wind_speed_bin[15];
+    int Wind_angle_bin[32];
 
     struct STE_point
     {
@@ -63,12 +66,12 @@ public:
             COGM,
             Variation,
             Depth,
-            CrseWind,
-            RelWind,
-            TrueWind,
-            TWSpd,
-            RWSpd,
-            SpdParWind,
+            TWD,
+            RWA,
+            TWA,
+            TWS,
+            RWS,
+            VMG_W,
             BtHDG,
             BtWatSpd,
             WPLat,
@@ -77,7 +80,7 @@ public:
             XTE,
             BrngWP,
             pixels_knot_ratioWP,
-            VMG,
+            VMG_C,
             Waypoint;     
     } m_Point;
 
@@ -99,7 +102,7 @@ public:
 
     bool            newform;
 	wxDC*			dc;
-	wxColour		windColour[12];
+	wxColour		windColour[15];
 	polar_pi*		plugin;
 
 	double			display_speed;
@@ -120,6 +123,10 @@ public:
     double          m_COG;
     double          m_HDG;
 
+    wxString Header;
+    wxString WindSpd;
+    wxString BoatSpd;
+
 	bool			input_NMEA;
 //	bool			engineRunning;
 //	wxDateTime		dtRPM;
@@ -134,12 +141,13 @@ public:
 	void Render_Polar();
 	void createDiagram(wxDC& dc);
 	void createSpeedBullets();
-    void set_grid_indexes();
+    void set_grid_indices();
                
 	void set_Dlg_for_DataSource(int sel);
 	void load_POL_datum_str(wxString s, int row, int col);
 	void parse_NMEA(wxString sentence);
     void check_grid_increments();
+    void clear_grid_indices();
     bool validate_data(bool rel);
 
     void showFilterDlg();    
@@ -153,6 +161,10 @@ public:
 	void clear_Master_pol();
     void save_POL_file();
     void load_POL_file();
+    void clear_Wind_speed_bin();
+    void clear_Wind_angle_bin();
+    void set_default_Wind_speed_bins();
+    void set_default_Wind_angle_bins();
 
     void load_Logbook();
     void loadVDR();

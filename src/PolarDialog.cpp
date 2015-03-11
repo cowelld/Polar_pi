@@ -94,7 +94,7 @@ void PolarDialog::PolarDlgOnInitDialog( wxInitDialogEvent& event )
 //	m_splitter1->Unsplit();
 	m_gridEdit->GetGridCornerLabelWindow()->SetFocus();
 	m_gridEdit->GetGridCornerLabelWindow()->SetForegroundColour(wxColour(0,0,0));
-	m_gridEdit->GetGridCornerLabelWindow()->SetLabel(wxString((_("TWA/TWS"))));
+	m_gridEdit->GetGridCornerLabelWindow()->SetLabel(wxString((_("TWA\TWS"))));
 	m_gridEdit->GetGridCornerLabelWindow()->Refresh();
 
     event.Skip();

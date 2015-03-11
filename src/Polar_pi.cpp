@@ -249,6 +249,7 @@ void polar_pi::ShowPreferencesDialog( wxWindow* parent )
             if(m_boatLWL != m_pBoat_LWL->GetValue()){
                 m_boatLWL = m_pBoat_LWL->GetValue();
                 m_boatLWL.ToDouble(&m_boat_LWL);
+                m_hull_speed = 1.43*sqrt(m_boat_LWL);
             }
 
             if(Wind_Speed_inc != m_tWind_Inc->GetValue()){
@@ -402,6 +403,7 @@ bool polar_pi::LoadConfig(void)
             pConf->Read ( _T( "PolarPlaningBoat" ), &m_bPlaning, 0 );
             pConf->Read ( _T( "PolarBoatLWL" ) ,&m_boatLWL, _T("0.0") );
             m_boatLWL.ToDouble(&m_boat_LWL);
+            m_hull_speed = 1.43*sqrt(m_boat_LWL);
             pConf->Read ( _T( "PolarSpeedlimit" ), &m_bSpeed_limit, 0 );
             pConf->Read ( _T( "PolarWindDirInc" ), &Wind_Dir_inc, _("5") );
             Wind_Dir_increment = wxAtol(Wind_Dir_inc);
