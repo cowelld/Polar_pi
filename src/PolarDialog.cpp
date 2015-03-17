@@ -202,6 +202,22 @@ void PolarDialog::OnGridCellChange( wxGridEvent& event )
 	event.Skip();
 }
 
+void PolarDialog::OnGridLabelSelect( wxGridEvent& event)
+{
+    int Col = event.GetCol();
+    if (Col > 0)
+    {
+        m_displaywind_speed->SetSelection(Col+1);
+    }
+    else {
+        int Row = event.GetRow();
+        if (Row > 0)
+        {
+        }
+    }
+    m_panelPolar->Refresh();
+}
+
 void PolarDialog::OnSizesplitter1( wxSizeEvent& event )
 {
 	int pos = this->m_splitter1->GetSashPosition();

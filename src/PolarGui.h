@@ -84,6 +84,7 @@ class PolarDlg : public wxDialog
 		virtual void OnSplitterSashPosChanged( wxSplitterEvent& event ) { event.Skip(); }
 		virtual void OnPaintPolar( wxPaintEvent& event ) { event.Skip(); }
 		virtual void OnGridCellChange( wxGridEvent& event ) { event.Skip(); }
+		virtual void OnGridLabelSelect( wxGridEvent& event ) { event.Skip(); }
 		virtual void OnButtonClickClearData( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnToggleButtonRecord( wxCommandEvent& event ) { event.Skip(); }
 		

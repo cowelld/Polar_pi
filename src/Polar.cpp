@@ -1169,7 +1169,7 @@ void Polar::load_POL_file()
 
 	set_Dlg_for_DataSource(3);          // Manual edit grid
 
-    wxString m_infilename = fdlg.GetPath();  
+    wxString m_infilename = fdlg.GetPath(); 
     wxTextFile   m_infile;
     m_infile.Open(m_infilename);
 
@@ -1183,47 +1183,54 @@ void Polar::load_POL_file()
     wxString in_str =  m_infile.GetFirstLine();
 
     wxString temp;
-	if(in_str.Contains(_T("TWA\\TWS")))
-    {
-        if(in_str.Contains(_T("\t"))){
+//	if(in_str.Find(_T("TWA\\TWS"))!= wxNOT_FOUND)
+//    {
+        if(in_str.Find(_T("\t"))!= wxNOT_FOUND){
 			file_type = 1;
             wxStringTokenizer tk(in_str,_T("\t"),wxTOKEN_RET_EMPTY);	
 			tkz = tk;
         }
 
-        else if(in_str.Contains(_T(";"))){
+        if(in_str.Find(_T(";"))!= wxNOT_FOUND){
             file_type = 1;
             wxStringTokenizer tk(in_str,_T(";"),wxTOKEN_RET_EMPTY);	
 			tkz = tk;
         }
-    }
+//    }
 
-	else if (in_str.Contains(_T("TWA"))) {
+/*	else if (in_str.Find(_T("TWA"))!= wxNOT_FOUND)
+    {
 		file_type = 1;
         wxStringTokenizer tk(in_str,_T("\t"),wxTOKEN_RET_EMPTY);	
 		tkz = tk;
     }
+*/
+	    if(in_str.Find (_(","))!= wxNOT_FOUND)
+        {
+            file_type = 1;
+            wxStringTokenizer tk(in_str,_T(","),wxTOKEN_RET_EMPTY);
+		    tkz = tk;
+        }
 
-	else if(in_str.Contains (_(","))) {
-        file_type = 2;
-        wxStringTokenizer tk(in_str,_T(","),wxTOKEN_RET_EMPTY);
-		tkz = tk;
-        tkz.SetString(in_str);
-        temp = tkz.GetNextToken();
-        dlg->plugin->initial_Dir = wxAtol(temp);
-        temp = in_str.GetChar(0);
-        dlg->plugin->Wind_Speed_increment = wxAtol(temp);
-    }
-    else if(in_str.Contains (_(" "))) {
-        file_type = 2;
-        wxStringTokenizer tk(in_str,_T(" "),wxTOKEN_RET_EMPTY);
-		tkz = tk;
-    }
-    else 
-	{
-		wxMessageBox(_T("Cannot load this file"));
-		return;
-	}
+        if(in_str.Find (_("    "))!= wxNOT_FOUND)   // Linux tab substitution
+        {
+            file_type = 1;
+            wxStringTokenizer tk(in_str,_T("     "),wxTOKEN_RET_EMPTY);
+		    tkz = tk;
+        }
+
+        if(in_str.Find (_(" "))!= wxNOT_FOUND)
+        {
+            file_type = 1;
+            wxStringTokenizer tk(in_str,_T(" "),wxTOKEN_RET_EMPTY);
+		    tkz = tk;
+        }
+
+        if (file_type == -1)
+	    {
+		    wxMessageBox(_T("Cannot load this file"));
+		    return;
+	    }
 
 //************************ Wind Speeds *************************************** 
     in_str =  m_infile.GetFirstLine();
@@ -1298,11 +1305,9 @@ void Polar::load_POL_file()
     clear_grid_indices();
     set_grid_indices();
 
-     if (fdlg.GetPath().Contains(_("ave"))){
-        wxString Filter = _("POL file AVERAGE");
-        dlg->m_staticTextRecord->AppendText(m_infilename);
-     }
-	    dlg->m_panelPolar->Refresh();
+    m_infilename = _T("POL File: ") + fdlg.GetPath() + _T("\r\n");
+    dlg->m_staticTextRecord->AppendText(m_infilename);
+	dlg->m_panelPolar->Refresh();
 }
 
 //**************** Support routines for major functions ***********************************

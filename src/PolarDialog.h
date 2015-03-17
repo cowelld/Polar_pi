@@ -33,6 +33,7 @@ class PolarDialog : public PolarDlg
 		void OnChoiceMode( wxCommandEvent& event );
         void OnChoiceSource( wxCommandEvent& event );
 		void OnGridCellChange( wxGridEvent& event );
+        void OnGridLabelSelect( wxGridEvent& event);
 		void OnNMEAtimer(wxTimerEvent& event);
 //		void OnTimerRPM(wxTimerEvent& event);
 		void OnSizesplitter1( wxSizeEvent& event );
